@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Afegix camps personalitzats en incidències",
             "FIELD_TYPE_TEXT": "Text",
             "FIELD_TYPE_MULTI": "Múltiples línies",
-            "FIELD_TYPE_DATE": "Data"
+            "FIELD_TYPE_DATE": "Data",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Valors de projecte - {{projectName}}",

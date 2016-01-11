@@ -1,0 +1,17 @@
+{
+	"SELECT_CHOICES": [
+		"Customer Experience", 
+		"Content Verification",
+		"Marketing",
+		"Logistics",
+		"Finance",
+		"BI/BD",
+		"Promo Hub",
+		"LYF",
+		"Admin",
+		"Human Resources", 
+		"Sales",
+		"Design and Development", 
+		"IT Infrastructure"
+	]
+}

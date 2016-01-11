@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Добавить специальное поле для запросов",
             "FIELD_TYPE_TEXT": "Текст",
             "FIELD_TYPE_MULTI": "Многостроковое",
-            "FIELD_TYPE_DATE": "Дата"
+            "FIELD_TYPE_DATE": "Дата",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Значения атрибутов проекта - {{projectName}}",

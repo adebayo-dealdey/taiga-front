@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Lisää oma kenttä pyynnöille",
             "FIELD_TYPE_TEXT": "Text",
             "FIELD_TYPE_MULTI": "Multi-line",
-            "FIELD_TYPE_DATE": "Date"
+            "FIELD_TYPE_DATE": "Date",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Project values - {{projectName}}",

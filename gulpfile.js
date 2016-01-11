@@ -1,5 +1,6 @@
 var gulp = require("gulp"),
     imagemin = require("gulp-imagemin"),
+    data = require('gulp-data'),
     jade = require("gulp-jade"),
     coffee = require("gulp-coffee"),
     concat = require("gulp-concat"),
@@ -48,9 +49,11 @@ paths.distVersion = paths.dist + version + "/";
 paths.tmp = "tmp/";
 paths.extras = "extras/";
 paths.vendor = "vendor/";
+paths.customAttributes = paths.app + "partials/custom-attributes/";
 
 paths.jade = [
-    paths.app + "**/*.jade"
+    paths.app + "**/*.jade",
+    "!" + paths.app + "**/custom-attribute-value-edit.jade"
 ];
 
 paths.htmlPartials = [
@@ -194,6 +197,15 @@ gulp.task("jade", function() {
         .pipe(gulp.dest(paths.tmp));
 });
 
+gulp.task('templates', function() {
+  return gulp.src(paths.customAttributes +'*.jade')
+    .pipe(data( function(file) {
+                  return require('./' + paths.app +'data.json');
+                } ))
+    .pipe(jade())
+    .pipe(gulp.dest(paths.tmp + "partials/custom-attributes/"));
+});
+
 gulp.task("jade-inheritance", function() {
     return gulp.src(paths.jade)
         .pipe(plumber())
@@ -216,11 +228,11 @@ gulp.task("template-cache", function() {
 });
 
 gulp.task("jade-deploy", function(cb) {
-    return runSequence("jade", "copy-index", "template-cache", cb);
+    return runSequence("jade", "copy-index", "templates", "template-cache", cb);
 });
 
 gulp.task("jade-watch", function(cb) {
-    return runSequence("jade-inheritance", "copy-index", "template-cache", cb);
+    return runSequence("jade-inheritance", "copy-index", "templates", "template-cache", cb);
 });
 
 /*

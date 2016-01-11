@@ -15,6 +15,12 @@ form.custom-field-single.editable
         textarea#custom-field-value(name="value") <%- value %>
         <% } else if (type=="date") { %>
         input#custom-field-value(name="value", type="text", value!="<%- value %>")
+        <% } else if (type=="select") { %>
+        select#custom-field-value(name="value")
+            option(value="", translate="EXTRAS.CUSTOM_ATTRIBUTES.SELECT_TYPE_DEFAULT")
+            for choices in SELECT_CHOICES
+                option(value=choices) #{choices}
+                
         <% } else { %>
         input#custom-field-value(name="value", type="text", value!="<%- value %>")
         <% } %>

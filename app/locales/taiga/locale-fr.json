@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Ajouter un champ personnalisé dans les tickets",
             "FIELD_TYPE_TEXT": "Texte",
             "FIELD_TYPE_MULTI": "Multiligne",
-            "FIELD_TYPE_DATE": "Date"
+            "FIELD_TYPE_DATE": "Date",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Valeurs du projet - {{projectName}}",

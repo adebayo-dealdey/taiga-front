@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Add a custom field in issues",
             "FIELD_TYPE_TEXT": "Text",
             "FIELD_TYPE_MULTI": "Multi-line",
-            "FIELD_TYPE_DATE": "Date"
+            "FIELD_TYPE_DATE": "Date",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Project values - {{projectName}}",
@@ -1417,5 +1418,16 @@
                 "TEXT2": "Good luck!"
             }
         }
-    }
+    },
+    "EXTRAS": {
+        "CUSTOM_ATTRIBUTES": {
+            "SELECT_TYPE_DEFAULT": "--- Choose ---"
+        },
+        "SELECT_CHOICES": {
+            "C_C": "Customer Care",
+            "D_D": "Design and Development",
+            "H_R": "Human Resources",
+            "INFRA": "Infrastructure"
+        }
+     }
 }

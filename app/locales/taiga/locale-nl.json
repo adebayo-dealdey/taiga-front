@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Voeg een aangepast veld toe in issues",
             "FIELD_TYPE_TEXT": "Tekst",
             "FIELD_TYPE_MULTI": "Over meerdere regels",
-            "FIELD_TYPE_DATE": "Date"
+            "FIELD_TYPE_DATE": "Date",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Project waardes - {{projectName}}",

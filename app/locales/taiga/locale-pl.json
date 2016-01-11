@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Dodaj własne pole dla zgłoszeń",
             "FIELD_TYPE_TEXT": "Tekst",
             "FIELD_TYPE_MULTI": "Pole wielowierszowe",
-            "FIELD_TYPE_DATE": "Date"
+            "FIELD_TYPE_DATE": "Date",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Wartości projektu - {{projectName}}",

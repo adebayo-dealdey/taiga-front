@@ -31,6 +31,7 @@ module = angular.module("taigaCommon")
 TEXT_TYPE = "text"
 MULTILINE_TYPE = "multiline"
 DATE_TYPE = "date"
+SELECT_TYPE = "select"
 
 
 TYPE_CHOICES = [
@@ -45,6 +46,10 @@ TYPE_CHOICES = [
     {
         key: DATE_TYPE,
         name: "ADMIN.CUSTOM_FIELDS.FIELD_TYPE_DATE"
+    },
+    {
+        key: SELECT_TYPE,
+        name: "ADMIN.CUSTOM_FIELDS.FIELD_TYPE_SELECT"
     }
 ]
 
@@ -195,7 +200,7 @@ CustomAttributeValueDirective = ($template, $selectedText, $compile, $translate,
         submit = debounce 2000, (event) =>
             event.preventDefault()
 
-            attributeValue.value = $el.find("input[name=value], textarea[name='value']").val()
+            attributeValue.value = $el.find("input[name=value], textarea[name='value'], select[name='value']").val()
             if attributeValue.type is DATE_TYPE
                 if moment(attributeValue.value, prettyDate).isValid()
                     attributeValue.value = moment(attributeValue.value, prettyDate).format("YYYY-MM-DD")
@@ -207,7 +212,7 @@ CustomAttributeValueDirective = ($template, $selectedText, $compile, $translate,
                     render(attributeValue, false)
 
         setFocusAndSelectOnInputField = ->
-            $el.find("input[name='value'], textarea[name='value']").focus().select()
+            $el.find("input[name='value'], textarea[name='value'], select[name='value']").focus().select()
 
         # Bootstrap
         attributeValue = $scope.$eval($attrs.tgCustomAttributeValue)
@@ -226,8 +231,8 @@ CustomAttributeValueDirective = ($template, $selectedText, $compile, $translate,
             setFocusAndSelectOnInputField()
 
         ## Actions (on edit mode)
-        $el.on "keyup", "input[name=value], textarea[name='value']", (event) ->
-            if event.keyCode is 13 and event.currentTarget.type isnt "textarea"
+        $el.on "keyup", "input[name=value], textarea[name='value'], select[name='value']", (event) ->
+            if event.keyCode is 13 and event.currentTarget.type isnt "textarea" and event.currentTarget.type isnt "select"
                 submit(event)
             else if event.keyCode == 27
                 render(attributeValue, false)

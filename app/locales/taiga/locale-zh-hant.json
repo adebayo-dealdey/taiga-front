@@ -473,7 +473,8 @@
             "ISSUE_ADD": "在問題中加入客制欄位",
             "FIELD_TYPE_TEXT": "單行文字",
             "FIELD_TYPE_MULTI": "多行",
-            "FIELD_TYPE_DATE": "Date"
+            "FIELD_TYPE_DATE": "Date",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - 專案數值 - {{projectName}}",

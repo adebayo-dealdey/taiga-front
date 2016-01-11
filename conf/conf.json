@@ -1,0 +1,20 @@
+{
+    "api": "http://localhost:8000/api/v1/",
+    "eventsUrl": "ws://localhost:8000/events",
+    "eventsMaxMissedHeartbeats": 5,
+    "eventsHeartbeatIntervalTime": 60000,
+    "debug": true,
+    "debugInfo": true,
+    "defaultLanguage": "en",
+    "themes": ["taiga"],
+    "defaultTheme": "taiga",
+    "publicRegisterEnabled": true,
+    "feedbackEnabled": true,
+    "privacyPolicyUrl": null,
+    "termsOfServiceUrl": null,
+    "maxUploadFileSize": null,
+    "contribPlugins": [
+	"/js/slack.js",
+    "/js/gogs.js",
+    "/js/hipchat.js" ]
+}

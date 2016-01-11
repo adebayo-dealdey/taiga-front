@@ -473,7 +473,8 @@
             "ISSUE_ADD": "Fügen Sie den Tickets ein benutzerdefiniertes Feld hinzu ",
             "FIELD_TYPE_TEXT": "Text",
             "FIELD_TYPE_MULTI": "Mehrzeilig",
-            "FIELD_TYPE_DATE": "Datum"
+            "FIELD_TYPE_DATE": "Datum",
+            "FIELD_TYPE_SELECT": "Combo-Box"
         },
         "PROJECT_VALUES": {
             "PAGE_TITLE": "{{sectionName}} - Projekt Werte - {{projectName}}",

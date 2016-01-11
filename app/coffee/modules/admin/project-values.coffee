@@ -378,6 +378,7 @@ module.directive("tgColorSelection", ColorSelectionDirective)
 TEXT_TYPE = "text"
 MULTILINE_TYPE = "multiline"
 DATE_TYPE = "date"
+SELECT_TYPE = "select"
 
 
 TYPE_CHOICES = [
@@ -392,6 +393,10 @@ TYPE_CHOICES = [
     {
         key: DATE_TYPE,
         name: "ADMIN.CUSTOM_FIELDS.FIELD_TYPE_DATE"
+    },
+    {
+        key: SELECT_TYPE,
+        name: "ADMIN.CUSTOM_FIELDS.FIELD_TYPE_SELECT"
     }
 ]
 
