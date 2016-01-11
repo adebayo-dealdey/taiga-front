@@ -1,6 +1,6 @@
 ul.points-per-role
     <% _.each(roles, function(role) { %>
-    li.ticket-role-points(class!="total <% if(editable){ %>clickable<% } %>", data-role-id!="<%- role.id %>", title!="<%- role.name %>")
+    li.ticket-role-points.total(class!="<% if(editable){ %>clickable<% } %>", data-role-id!="<%- role.id %>", title!="<%- role.name %>")
         span.points 
             <%- role.points %>
             span.icon-arrow-bottom
