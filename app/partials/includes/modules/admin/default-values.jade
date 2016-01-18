@@ -26,6 +26,11 @@ section.default-values
                    ng-options="s.id as s.name for s in severitiesList")
 
         fieldset
+            label(for="default-value-trigger", translate="ADMIN.DEFAULT_VALUES.LABEL_TRIGGER")
+            select(id="default-value-trigger", ng-model="project.default_trigger",
+                   ng-options="t.id as t.name for t in triggersList")
+
+        fieldset
             label(for="default-value-issue-type", translate="ADMIN.DEFAULT_VALUES.LABEL_ISSUE_TYPE")
             select(id="default-value-issue-type", ng-model="project.default_issue_type",
                    ng-options="s.id as s.name for s in issueTypesList")

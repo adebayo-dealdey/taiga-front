@@ -82,6 +82,12 @@
             @include popover(150px, '', 30px, '', '');
         }
     }
+    .trigger-data {
+        position: relative;
+        .pop-trigger {
+            @include popover(150px, '', 30px, '', '');
+        }
+    }
 }
 
 .ticket-track-buttons {

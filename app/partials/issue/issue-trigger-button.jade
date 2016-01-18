@@ -1,0 +1,15 @@
+div(class!="trigger-data <% if(editable){ %>clickable<% }%>")
+    span(class="level", style!="background-color:<%- trigger.color %>")
+    span(class="trigger-trigger") <%- trigger.name %>
+    <% if(editable){ %>
+    span(class="icon icon-arrow-bottom")
+    <% } %>
+    span(class="level-name", translate="COMMON.FIELDS.TRIGGER")
+
+    ul(class="popover pop-trigger")
+        <% _.each(triggeres, function(tr) { %>
+        li
+            a(href="", class="trigger", title!="<%- tr.name %>",
+               data-trigger-id!="<%- tr.id %>")
+                | <%- tr.name %>
+        <% }); %>

@@ -90,6 +90,7 @@ urls = {
     "project-admin-project-values-points": "/project/:project/admin/project-values/points"
     "project-admin-project-values-priorities": "/project/:project/admin/project-values/priorities"
     "project-admin-project-values-severities": "/project/:project/admin/project-values/severities"
+    "project-admin-project-values-triggers": "/project/:project/admin/project-values/triggers"
     "project-admin-project-values-types": "/project/:project/admin/project-values/types"
     "project-admin-project-values-custom-fields": "/project/:project/admin/project-values/custom-fields"
 

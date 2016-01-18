@@ -46,6 +46,7 @@ CreateIssueDirective = ($repo, $confirm, $rootscope, lightboxService, $loading) 
                 type: project.default_issue_type
                 priority: project.default_priority
                 severity: project.default_severity
+                trigger: project.default_trigger
                 tags: []
             }
 

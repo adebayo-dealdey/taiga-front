@@ -10,8 +10,12 @@ form
             select.type(ng-model="issue.type", ng-options="t.id as t.name for t in issueTypes")
         fieldset
             select.priority(ng-model="issue.priority", ng-options="p.id as p.name for p in priorityList")
+
+    div.fieldset-row
         fieldset
             select.severity(ng-model="issue.severity", ng-options="s.id as s.name for s in severityList")
+        fieldset
+            select.trigger(ng-model="issue.trigger", ng-options="t.id as t.name for t in triggerList")
 
     fieldset
         div.tags-block(tg-lb-tag-line, ng-model="issue.tags")

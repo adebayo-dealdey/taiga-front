@@ -127,6 +127,7 @@ HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $c
                 type:                  $translate.instant("ACTIVITY.FIELDS.TYPE")
                 priority:              $translate.instant("ACTIVITY.FIELDS.PRIORITY")
                 severity:              $translate.instant("ACTIVITY.FIELDS.SEVERITY")
+                trigger:               $translate.instant("ACTIVITY.FIELDS.TRIGGER")
                 assigned_to :          $translate.instant("ACTIVITY.FIELDS.ASSIGNED_TO")
                 watchers :             $translate.instant("ACTIVITY.FIELDS.WATCHERS")
                 milestone :            $translate.instant("ACTIVITY.FIELDS.MILESTONE")

@@ -1,0 +1,6 @@
+ul(class="popover pop-trigger")
+    <% _.forEach(triggeres, function(trigger) { %>
+    li
+        a(href="" class="trigger", title!="<%- trigger.name %>", data-trigger-id!="<%- trigger.id %>")
+            | <%- trigger.name %>
+    <% }); %>

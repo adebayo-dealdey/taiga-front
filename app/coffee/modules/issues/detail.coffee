@@ -79,6 +79,7 @@ class IssueDetailController extends mixOf(taiga.Controller, taiga.PageMixin)
             issueStatus: @scope.statusById[@scope.issue.status]?.name or "--"
             issueType: @scope.typeById[@scope.issue.type]?.name or "--"
             issueSeverity: @scope.severityById[@scope.issue.severity]?.name or "--"
+            issueTrigger: @scope.triggerById[@scope.issue.trigger]?.name or "--"
             issuePriority: @scope.priorityById[@scope.issue.priority]?.name or "--"
             issueDescription: angular.element(@scope.issue.description_html or "").text()
         })
@@ -117,6 +118,8 @@ class IssueDetailController extends mixOf(taiga.Controller, taiga.PageMixin)
             @scope.typeList = _.sortBy(project.issue_types, "order")
             @scope.severityList = project.severities
             @scope.severityById = groupBy(project.severities, (x) -> x.id)
+            @scope.triggerList = project.triggers
+            @scope.triggerById = groupBy(project.triggers, (x) -> x.id)
             @scope.priorityList = project.priorities
             @scope.priorityById = groupBy(project.priorities, (x) -> x.id)
             return project
@@ -501,6 +504,95 @@ IssueSeverityButtonDirective = ($rootScope, $repo, $confirm, $loading, $qqueue, 
     }
 
 module.directive("tgIssueSeverityButton", ["$rootScope", "$tgRepo", "$tgConfirm", "$tgLoading", "$tgQqueue", "$tgTemplate", "$compile", IssueSeverityButtonDirective])
+
+
+#############################################################################
+## Issue trigger button directive
+#############################################################################
+
+IssueTriggerButtonDirective = ($rootScope, $repo, $confirm, $loading, $qqueue, $template, $compile) ->
+    # Display the Trigger of Issue and you can edit it.
+    #
+    # Example:
+    #     tg-issue-trigger-button(ng-model="issue")
+    #
+    # Requirements:
+    #   - Issue object (ng-model)
+    #   - scope.triggerById object
+    #   - $scope.project.my_permissions
+
+    template = $template.get("issue/issue-trigger-button.html", true)
+
+    link = ($scope, $el, $attrs, $model) ->
+        isEditable = ->
+            return $scope.project.my_permissions.indexOf("modify_issue") != -1
+
+        render = (issue) =>
+            trigger = $scope.triggerById[issue.trigger]
+
+            html = template({
+                trigger: trigger
+                triggeres: $scope.triggerList
+                editable: isEditable()
+            })
+
+            html = $compile(html)($scope)
+
+            $el.html(html)
+
+        save = $qqueue.bindAdd (trigger) =>
+            $.fn.popover().closeAll()
+
+            issue = $model.$modelValue.clone()
+            issue.trigger = trigger
+
+            currentLoading = $loading()
+                .target($el.find(".level-name"))
+                .start()
+
+            onSuccess = ->
+                $confirm.notify("success")
+                $model.$setViewValue(issue)
+                $rootScope.$broadcast("object:updated")
+                currentLoading.finish()
+            onError = ->
+                $confirm.notify("error")
+                issue.revert()
+                $model.$setViewValue(issue)
+                currentLoading.finish()
+
+            $repo.save(issue).then(onSuccess, onError)
+
+        $el.on "click", ".trigger-data", (event) ->
+            event.preventDefault()
+            event.stopPropagation()
+            return if not isEditable()
+
+            $el.find(".pop-trigger").popover().open()
+
+        $el.on "click", ".trigger", (event) ->
+            event.preventDefault()
+            event.stopPropagation()
+            return if not isEditable()
+
+            target = angular.element(event.currentTarget)
+            trigger = target.data("trigger-id")
+
+            save(trigger)
+
+        $scope.$watch $attrs.ngModel, (issue) ->
+            render(issue) if issue
+
+        $scope.$on "$destroy", ->
+            $el.off()
+
+    return {
+        link: link
+        restrict: "EA"
+        require: "ngModel"
+    }
+
+module.directive("tgIssueTriggerButton", ["$rootScope", "$tgRepo", "$tgConfirm", "$tgLoading", "$tgQqueue", "$tgTemplate", "$compile", IssueTriggerButtonDirective])
 
 
 #############################################################################

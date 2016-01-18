@@ -36,6 +36,7 @@ class UserTimelineService extends taiga.Service
         'assigned_to',
         'points',
         'severity',
+        'trigger',
         'priority',
         'type',
         'attachments',

@@ -6,6 +6,7 @@ section.issues-table.basic-table(ng-class="{empty: !issues.length}")
         div.votes(data-fieldname="total_voters", translate="ISSUES.TABLE.COLUMNS.VOTES")
         div.subject(data-fieldname="subject", translate="ISSUES.TABLE.COLUMNS.SUBJECT")
         div.issue-field(data-fieldname="status", translate="ISSUES.TABLE.COLUMNS.STATUS")
+        div.trigger-field(data-fieldname="trigger", translate="ISSUES.TABLE.COLUMNS.TRIGGER")
         div.created-field(data-fieldname="created_date", translate="ISSUES.TABLE.COLUMNS.CREATED")
         div.assigned-field(data-fieldname="assigned_to", translate="ISSUES.TABLE.COLUMNS.ASSIGNED_TO")
 
@@ -44,6 +45,15 @@ section.issues-table.basic-table(ng-class="{empty: !issues.length}")
                 span.issue-status-bind
                 span.icon.icon-arrow-bottom(tg-check-permission="modify_issue")
 
+        div.trigger-field(tg-issue-trigger-inline-edition="issue")
+            a.issue-trigger(
+                href=""
+                title="{{'ISSUES.TABLE.TITLE_ACTION_CHANGE_TRIGGER' | translate}}"
+            )
+                span.issue-trigger-bind
+                span.icon.icon-arrow-bottom(tg-check-permission="modify_issue")
+
+                
         div.created-field(tg-bo-bind="issue.created_date|momentFormat:'DD MMM YYYY HH:mm'")
 
         div.assigned-field(tg-issue-assigned-to-inline-edition="issue")

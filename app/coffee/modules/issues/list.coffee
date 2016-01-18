@@ -105,6 +105,8 @@ class IssuesController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.Fi
             @scope.issueStatusList = _.sortBy(project.issue_statuses, "order")
             @scope.severityById = groupBy(project.severities, (x) -> x.id)
             @scope.severityList = _.sortBy(project.severities, "order")
+            @scope.triggerById = groupBy(project.triggers, (x) -> x.id)
+            @scope.triggerList = _.sortBy(project.triggers, "order")
             @scope.priorityById = groupBy(project.priorities, (x) -> x.id)
             @scope.priorityList = _.sortBy(project.priorities, "order")
             @scope.issueTypes = _.sortBy(project.issue_types, "order")
@@ -114,7 +116,7 @@ class IssuesController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.Fi
 
     getUrlFilters: ->
         filters = _.pick(@location.search(), "page", "tags", "status", "types",
-                                             "q", "severities", "priorities",
+                                             "q", "severities", "triggers", "priorities",
                                              "assignedTo", "createdBy", "orderBy")
 
         filters.page = 1 if not filters.page
@@ -186,6 +188,7 @@ class IssuesController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.Fi
         loadFilters.q = urlfilters.q
         loadFilters.types = urlfilters.types
         loadFilters.severities = urlfilters.severities
+        loadFilters.triggers = urlfilters.triggers
         loadFilters.priorities = urlfilters.priorities
         loadFilters.assigned_to = urlfilters.assignedTo
         loadFilters.owner = urlfilters.createdBy
@@ -223,6 +226,7 @@ class IssuesController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.Fi
             # Build filters data structure
             @scope.filters.status = choicesFiltersFormat(data.statuses, "status", @scope.issueStatusById)
             @scope.filters.severities = choicesFiltersFormat(data.severities, "severities", @scope.severityById)
+            @scope.filters.triggers = choicesFiltersFormat(data.triggers, "triggers", @scope.triggerById)
             @scope.filters.priorities = choicesFiltersFormat(data.priorities, "priorities", @scope.priorityById)
             @scope.filters.assignedTo = usersFiltersFormat(data.assigned_to, "assignedTo", "Unassigned")
             @scope.filters.createdBy = usersFiltersFormat(data.owners, "createdBy", "Unknown")
@@ -255,6 +259,8 @@ class IssuesController extends mixOf(taiga.Controller, taiga.PageMixin, taiga.Fi
                 name = "order_by"
             else if name == "priorities"
                 name = "priority"
+            else if name == "triggers"
+                name = "trigger"
             else if name == "assignedTo"
                 name = "assigned_to"
             else if name == "createdBy"
@@ -561,6 +567,11 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
             html = $compile(html)($scope)
             $el.find(".filter-list").html(html)
 
+        $scope.$on "filters:triggerupdate", (ctx, filters) ->
+            html = template({filters:filters.triggers})
+            html = $compile(html)($scope)
+            $el.find(".filter-list").html(html)
+
         selectQFilter = debounceLeading 100, (value, oldValue) ->
             return if value is undefined or  value == oldValue
 
@@ -769,6 +780,87 @@ IssueStatusInlineEditionDirective = ($repo, $template, $rootscope) ->
 
 module.directive("tgIssueStatusInlineEdition", ["$tgRepo", "$tgTemplate", "$rootScope",
                                                 IssueStatusInlineEditionDirective])
+
+#############################################################################
+## Issue trigger Directive (popover for change trigger)
+#############################################################################
+
+IssueTriggerInlineEditionDirective = ($repo, $template, $rootscope) ->
+    ###
+    Print the trigger of an Issue and a popover to change it.
+    - tg-issue-trigger-inline-edition: The issue
+
+    Example:
+
+      div.trigger(tg-issue-trigger-inline-edition="issue")
+        a.issue-trigger(href="")
+
+    NOTE: This directive need 'triggerById' and 'project'.
+    ###
+    selectionTemplate = $template.get("issue/issue-trigger-inline-edition-selection.html", true)
+
+    updateIssueTrigger = ($el, issue, triggerById) ->
+        issueTriggerDomParent = $el.find(".issue-trigger")
+        issueTriggerDom = $el.find(".issue-trigger .issue-trigger-bind")
+
+        trigger = triggerById[issue.trigger]
+
+        if trigger
+            issueTriggerDom.text(trigger.name)
+            issueTriggerDom.prop("title", trigger.name)
+            issueTriggerDomParent.css('color', trigger.color)
+
+    link = ($scope, $el, $attrs) ->
+        $ctrl = $el.controller()
+        issue = $scope.$eval($attrs.tgIssueTriggerInlineEdition)
+
+        $el.on "click", ".issue-trigger", (event) ->
+            event.preventDefault()
+            event.stopPropagation()
+            $el.find(".pop-trigger").popover().open()
+
+        $el.on "click", ".trigger", (event) ->
+            event.preventDefault()
+            event.stopPropagation()
+            target = angular.element(event.currentTarget)
+
+            for filter in $scope.filters.triggers
+                if filter.id == issue.trigger
+                    filter.count--
+
+            issue.trigger = target.data("trigger-id")
+            $el.find(".pop-trigger").popover().close()
+            updateIssueTrigger($el, issue, $scope.triggerById)
+
+            $scope.$apply () ->
+                $repo.save(issue).then ->
+                    $ctrl.loadIssues()
+
+                for filter in $scope.filters.triggers
+                    if filter.id == issue.trigger
+                        filter.count++
+
+                $rootscope.$broadcast("filters:triggerupdate", $scope.filters)
+
+        taiga.bindOnce $scope, "project", (project) ->
+            $el.append(selectionTemplate({ 'triggeres':  project.triggers }))
+            updateIssueTrigger($el, issue, $scope.triggerById)
+
+            # If the user has not enough permissions the click events are unbinded
+            if project.my_permissions.indexOf("modify_issue") == -1
+                $el.unbind("click")
+                $el.find("a").addClass("not-clickable")
+
+        $scope.$watch $attrs.tgIssueTriggerInlineEdition, (val) =>
+            updateIssueTrigger($el, val, $scope.triggerById)
+
+        $scope.$on "$destroy", ->
+            $el.off()
+
+    return {link: link}
+
+module.directive("tgIssueTriggerInlineEdition", ["$tgRepo", "$tgTemplate", "$rootScope",
+                                                IssueTriggerInlineEditionDirective])
 
 
 #############################################################################

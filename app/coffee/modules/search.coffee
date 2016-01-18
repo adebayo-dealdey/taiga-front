@@ -87,6 +87,7 @@ class SearchController extends mixOf(taiga.Controller, taiga.PageMixin)
             @scope.issueStatusById = groupBy(project.issue_statuses, (x) -> x.id)
             @scope.taskStatusById = groupBy(project.task_statuses, (x) -> x.id)
             @scope.severityById = groupBy(project.severities, (x) -> x.id)
+            @scope.triggerById = groupBy(project.triggers, (x) -> x.id)
             @scope.priorityById = groupBy(project.priorities, (x) -> x.id)
             @scope.usStatusById = groupBy(project.us_statuses, (x) -> x.id)
             return project

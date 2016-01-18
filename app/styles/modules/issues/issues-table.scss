@@ -90,8 +90,9 @@
         }
     }
     .issue-field,
+    .trigger-field,
     .assigned-field,
-    .created-field ,
+    .created-field,
     .assigned-field {
         flex-basis: 140px;
         flex-grow: 1;
@@ -128,6 +129,13 @@
         }
     }
     .pop-status {
+        @include popover(200px, 20px, 0, '', '');
+        &.fix {
+            bottom: 0;
+            top: auto;
+        }
+    }
+    .pop-trigger {
         @include popover(200px, 20px, 0, '', '');
         &.fix {
             bottom: 0;

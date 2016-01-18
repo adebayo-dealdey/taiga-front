@@ -126,6 +126,7 @@
             "STATUS": "Status",
             "TYPE": "Type",
             "SEVERITY": "Severity",
+            "TRIGGER": "Department",
             "PRIORITY": "Priority",
             "ASSIGNED_TO": "Assigned to",
             "POINTS": "Points",
@@ -499,6 +500,12 @@
             "ISSUE_TITLE": "Issue severities",
             "ACTION_ADD": "Add new severity"
         },
+        "PROJECT_VALUES_TRIGGERS": {
+            "TITLE": "Departments",
+            "SUBTITLE": "Specify the departments your issues will be raised from",
+            "ISSUE_TITLE": "Issue departments",
+            "ACTION_ADD": "Add new department"
+        },
         "PROJECT_VALUES_STATUS": {
             "TITLE": "Status",
             "SUBTITLE": "Specify the statuses your user stories, tasks and issues will go through",
@@ -605,6 +612,7 @@
             "LABEL_TASK_STATUS": "Default value for task status selector",
             "LABEL_PRIORITY": "Default value for priority selector",
             "LABEL_SEVERITY": "Default value for severity selector",
+            "LABEL_TRIGGER": "Default value for issue department selector",
             "LABEL_ISSUE_TYPE": "Default value for issue type selector",
             "LABEL_ISSUE_STATUS": "Default value for issue status selector"
         },
@@ -637,6 +645,7 @@
             "POINTS": "Points",
             "PRIORITIES": "Priorities",
             "SEVERITIES": "Severities",
+            "TRIGGERS": "Departments",
             "TYPES": "Types",
             "CUSTOM_FIELDS": "Custom fields"
         },
@@ -922,6 +931,7 @@
             "TYPE": "type",
             "PRIORITY": "priority",
             "SEVERITY": "severity",
+            "TRIGGER": "department",
             "ASSIGNED_TO" : "assigned to",
             "WATCHERS" : "watchers",
             "MILESTONE" : "sprint",
@@ -1126,6 +1136,7 @@
         "FIELDS": {
             "PRIORITY": "Priority",
             "SEVERITY": "Severity",
+            "TRIGGER": "Department",
             "TYPE": "Type"
         },
         "CONFIRM_PROMOTE": {
@@ -1144,6 +1155,7 @@
                 "STATUS": "Status",
                 "SEVERITY": "Severity",
                 "PRIORITIES": "Priorities",
+                "TRIGGER": "Departments",
                 "TAGS": "Tags",
                 "ASSIGNED_TO": "Assigned to",
                 "CREATED_BY": "Created by",
@@ -1162,10 +1174,12 @@
                 "SUBJECT": "Subject",
                 "VOTES": "Votes",
                 "STATUS": "Status",
+                "TRIGGER": "Department",
                 "CREATED": "Created",
                 "ASSIGNED_TO": "Assigned to"
             },
             "TITLE_ACTION_CHANGE_STATUS": "Change status",
+            "TITLE_ACTION_CHANGE_TRIGGER": "Change department",
             "TITLE_ACTION_ASSIGNED_TO": "Assigned to",
             "BLOCKED": "Blocked",
             "EMPTY": {

@@ -71,7 +71,7 @@ urls = {
     "project-watch": "/projects/%s/watch"
     "project-unwatch": "/projects/%s/unwatch"
 
-    # Project Values - Choises
+    # Project Values - Choices
     "userstory-statuses": "/userstory-statuses"
     "points": "/points"
     "task-statuses": "/task-statuses"
@@ -79,6 +79,7 @@ urls = {
     "issue-types": "/issue-types"
     "priorities": "/priorities"
     "severities": "/severities"
+    "triggers": "/triggers"
 
     # Milestones/Sprints
     "milestones": "/milestones"

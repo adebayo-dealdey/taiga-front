@@ -625,7 +625,6 @@ ListItemUsStatusDirective = ->
 
 module.directive("tgListitemUsStatus", ListItemUsStatusDirective)
 
-
 ListItemTaskStatusDirective = ->
     link = ($scope, $el, $attrs) ->
         task = $scope.$eval($attrs.tgListitemTaskStatus)
@@ -635,7 +634,6 @@ ListItemTaskStatusDirective = ->
     return {link:link}
 
 module.directive("tgListitemTaskStatus", ListItemTaskStatusDirective)
-
 
 ListItemAssignedtoDirective = ($template) ->
     template = $template.get("common/components/list-item-assigned-to-avatar.html", true)
@@ -656,7 +654,6 @@ ListItemAssignedtoDirective = ($template) ->
 
 module.directive("tgListitemAssignedto", ["$tgTemplate", ListItemAssignedtoDirective])
 
-
 ListItemIssueStatusDirective = ->
     link = ($scope, $el, $attrs) ->
         issue = $scope.$eval($attrs.tgListitemIssueStatus)
@@ -666,7 +663,6 @@ ListItemIssueStatusDirective = ->
     return {link:link}
 
 module.directive("tgListitemIssueStatus", ListItemIssueStatusDirective)
-
 
 ListItemTypeDirective = ->
     link = ($scope, $el, $attrs) ->
@@ -690,7 +686,6 @@ ListItemTypeDirective = ->
 
 module.directive("tgListitemType", ListItemTypeDirective)
 
-
 ListItemPriorityDirective = ->
     link = ($scope, $el, $attrs) ->
         render = (priorityById, issue) ->
@@ -712,7 +707,6 @@ ListItemPriorityDirective = ->
     }
 
 module.directive("tgListitemPriority", ListItemPriorityDirective)
-
 
 ListItemSeverityDirective = ->
     link = ($scope, $el, $attrs) ->
@@ -736,6 +730,15 @@ ListItemSeverityDirective = ->
 
 module.directive("tgListitemSeverity", ListItemSeverityDirective)
 
+ListItemTriggerDirective = ->
+    link = ($scope, $el, $attrs) ->
+        issue = $scope.$eval($attrs.tgListitemTrigger)
+        bindOnce $scope, "triggerById", (triggerById) ->
+            $el.html(triggerById[issue.trigger].name)
+
+    return {link:link}
+
+module.directive("tgListitemTrigger", ListItemTriggerDirective)
 
 #############################################################################
 ## Progress bar directive

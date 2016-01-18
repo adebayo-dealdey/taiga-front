@@ -244,6 +244,12 @@ configure = ($routeProvider, $locationProvider, $httpProvider, $provide, $tgEven
             section: "admin"
         }
     )
+    $routeProvider.when("/project/:pslug/admin/project-values/triggers",
+        {
+            templateUrl: "admin/admin-project-values-triggers.html",
+            section: "admin"
+        }
+    )
     $routeProvider.when("/project/:pslug/admin/project-values/types",
         {
             templateUrl: "admin/admin-project-values-types.html",
