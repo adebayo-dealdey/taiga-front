@@ -101,14 +101,13 @@
             @include popover(150px, '', 30px, '', '');
         }
     }
-    .status-data {
-        position: relative;
-        .pop-status {
-            @include popover(150px, '', 30px, '', '');
-        }
-    }
     .trigger-data {
+        background: darken($whitish, 5%);
+        margin-bottom: .5rem;
+        padding: .5rem;
+        padding-right: 1rem;
         position: relative;
+        transition: background .2s ease-in;
         .pop-trigger {
             @include popover(150px, '', 30px, '', '');
         }
