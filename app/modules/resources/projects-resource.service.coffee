@@ -22,6 +22,20 @@ pagination = () ->
 Resource = (urlsService, http, paginateResponseService) ->
     service = {}
 
+    service.getProjects = (params = {}, pagination = true) ->
+        url = urlsService.resolve("projects")
+
+        httpOptions = {}
+
+        if !pagination
+            httpOptions = {
+                headers: {
+                    "x-lazy-pagination": true
+                }
+            }
+
+        return http.get(url, params, httpOptions)
+
     service.getProjectBySlug = (projectSlug) ->
         url = urlsService.resolve("projects")
 

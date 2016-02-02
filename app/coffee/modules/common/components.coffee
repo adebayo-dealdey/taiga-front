@@ -185,13 +185,13 @@ WatchersDirective = ($rootscope, $confirm, $repo, $qqueue, $template, $compile, 
 
             promise = $repo.save($model.$modelValue)
             promise.then ->
-                $confirm.notify("success")
                 watchers = _.map(watchers, (watcherId) -> $scope.usersById[watcherId])
                 renderWatchers(watchers)
                 $rootscope.$broadcast("object:updated")
 
             promise.then null, ->
                 $model.$modelValue.revert()
+                $confirm.notify("error")
 
         deleteWatcher = $qqueue.bindAdd (watcherIds) =>
             item = $model.$modelValue.clone()
@@ -200,14 +200,12 @@ WatchersDirective = ($rootscope, $confirm, $repo, $qqueue, $template, $compile, 
 
             promise = $repo.save($model.$modelValue)
             promise.then ->
-                $confirm.notify("success")
                 watchers = _.map(item.watchers, (watcherId) -> $scope.usersById[watcherId])
                 renderWatchers(watchers)
                 $rootscope.$broadcast("object:updated")
             promise.then null, ->
                 item.revert()
                 $confirm.notify("error")
-
 
         renderWatchers = (watchers) ->
             ctx = {
@@ -235,12 +233,6 @@ WatchersDirective = ($rootscope, $confirm, $repo, $qqueue, $template, $compile, 
 
                 deleteWatcher(watcherIds)
 
-        $el.on "click", ".js-add-watcher", (event) ->
-            event.preventDefault()
-            return if not isEditable()
-            $scope.$apply ->
-                $rootscope.$broadcast("watcher:add", $model.$modelValue)
-
         $scope.$on "watcher:added", (ctx, watcherId) ->
             watchers = _.clone($model.$modelValue.watchers, false)
             watchers.push(watcherId)
@@ -266,7 +258,7 @@ module.directive("tgWatchers", ["$rootScope", "$tgConfirm", "$tgRepo", "$tgQqueu
 ## Assigned to directive
 #############################################################################
 
-AssignedToDirective = ($rootscope, $confirm, $repo, $loading, $qqueue, $template, $translate, $compile) ->
+AssignedToDirective = ($rootscope, $confirm, $repo, $loading, $qqueue, $template, $translate, $compile, $currentUserService) ->
     # You have to include a div with the tg-lb-assignedto directive in the page
     # where use this directive
     template = $template.get("common/components/assigned-to.html", true)
@@ -285,7 +277,6 @@ AssignedToDirective = ($rootscope, $confirm, $repo, $loading, $qqueue, $template
             promise = $repo.save($model.$modelValue)
             promise.then ->
                 currentLoading.finish()
-                $confirm.notify("success")
                 renderAssignedTo($model.$modelValue)
                 $rootscope.$broadcast("object:updated")
             promise.then null, ->
@@ -295,13 +286,25 @@ AssignedToDirective = ($rootscope, $confirm, $repo, $loading, $qqueue, $template
 
             return promise
 
-        renderAssignedTo = (issue) ->
-            assignedToId = issue?.assigned_to
-            assignedTo = if assignedToId? then $scope.usersById[assignedToId] else null
+        renderAssignedTo = (assignedObject) ->
+            if assignedObject?.assigned_to?
+                fullName = assignedObject.assigned_to_extra_info.full_name_display
+                photo = assignedObject.assigned_to_extra_info.photo
+                isUnassigned = false
+            else
+                fullName = $translate.instant("COMMON.ASSIGNED_TO.ASSIGN")
+                photo = "/#{window._version}/images/unnamed.png"
+                isUnassigned = true
+
+            isIocaine = assignedObject?.is_iocaine
 
             ctx = {
-                assignedTo: assignedTo
+                fullName: fullName
+                photo: photo
+                isUnassigned: isUnassigned
                 isEditable: isEditable()
+                isIocaine: isIocaine
+                fullNameVisible: !(isUnassigned && !$currentUserService.isAuthenticated())
             }
             html = $compile(template(ctx))($scope)
             $el.html(html)
@@ -311,6 +314,12 @@ AssignedToDirective = ($rootscope, $confirm, $repo, $loading, $qqueue, $template
             return if not isEditable()
             $scope.$apply ->
                 $rootscope.$broadcast("assigned-to:add", $model.$modelValue)
+
+        $el.on "click", ".assign-to-me", (event) ->
+            event.preventDefault()
+            return if not isEditable()
+            $model.$modelValue.assigned_to = $currentUserService.getUser().get('id')
+            save($currentUserService.getUser().get('id'))
 
         $el.on "click", ".icon-delete", (event) ->
             event.preventDefault()
@@ -338,7 +347,7 @@ AssignedToDirective = ($rootscope, $confirm, $repo, $loading, $qqueue, $template
         require:"ngModel"
     }
 
-module.directive("tgAssignedTo", ["$rootScope", "$tgConfirm", "$tgRepo", "$tgLoading", "$tgQqueue", "$tgTemplate", "$translate", "$compile",
+module.directive("tgAssignedTo", ["$rootScope", "$tgConfirm", "$tgRepo", "$tgLoading", "$tgQqueue", "$tgTemplate", "$translate", "$compile","tgCurrentUserService",
                                   AssignedToDirective])
 
 
@@ -360,11 +369,11 @@ BlockButtonDirective = ($rootscope, $loading, $template) ->
                 $el.find('.item-block').addClass('editable')
 
             if item.is_blocked
-                $el.find('.item-block').hide()
-                $el.find('.item-unblock').show()
+                $el.find('.item-block').removeClass('is-active')
+                $el.find('.item-unblock').addClass('is-active')
             else
-                $el.find('.item-block').show()
-                $el.find('.item-unblock').hide()
+                $el.find('.item-block').addClass('is-active')
+                $el.find('.item-unblock').removeClass('is-active')
 
         $el.on "click", ".item-block", (event) ->
             event.preventDefault()
@@ -619,11 +628,21 @@ module.directive("tgEditableDescription", [
 
 
 
-EditableWysiwyg = (attachmentsService) ->
+EditableWysiwyg = (attachmentsService, attachmentsFullService) ->
     link = ($scope, $el, $attrs, $model) ->
 
         isInEditMode = ->
             return $el.find('textarea').is(':visible')
+
+
+        uploadFile = (file, type) ->
+            return if !attachmentsService.validate(file)
+
+            return attachmentsFullService.addAttachment($model.$modelValue.project, $model.$modelValue.id, type, file).then (result) ->
+                if taiga.isImage(result.getIn(['file', 'name']))
+                    return '![' + result.getIn(['file', 'name']) + '](' + result.getIn(['file', 'url']) + ')'
+                else
+                    return '[' + result.getIn(['file', 'name']) + '](' + result.getIn(['file', 'url']) + ')'
 
         $el.on 'dragover', (e) ->
             textarea = $el.find('textarea').focus()
@@ -652,24 +671,13 @@ EditableWysiwyg = (attachmentsService) ->
                 else if type == "wiki"
                     type = "wiki_page"
 
-                file = dataTransfer.files[0]
+                promises = _.map dataTransfer.files, (file) ->
+                    return uploadFile(file, type)
 
-                return if !attachmentsService.validate(file)
-
-                attachmentsService.upload(
-                    file,
-                    $model.$modelValue.id,
-                    $model.$modelValue.project,
-                    type
-                ).then (result) ->
+                Promise.all(promises).then (result) ->
                     textarea = $el.find('textarea')
 
-                    if taiga.isImage(result.get('name'))
-                        url = '![' + result.get('name') + '](' + result.get('url') + ')'
-                    else
-                        url = '[' + result.get('name') + '](' + result.get('url') + ')'
-
-                    $.markItUp({ replaceWith: url })
+                    $.markItUp({ replaceWith: result.join(' ') })
 
                     textarea.removeClass('in-progress')
 
@@ -679,7 +687,7 @@ EditableWysiwyg = (attachmentsService) ->
         require: "ngModel"
     }
 
-module.directive("tgEditableWysiwyg", ["tgAttachmentsService", EditableWysiwyg])
+module.directive("tgEditableWysiwyg", ["tgAttachmentsService", "tgAttachmentsFullService", EditableWysiwyg])
 
 
 #############################################################################
@@ -711,13 +719,16 @@ ListItemTaskStatusDirective = ->
 module.directive("tgListitemTaskStatus", ListItemTaskStatusDirective)
 
 
-ListItemAssignedtoDirective = ($template) ->
+ListItemAssignedtoDirective = ($template, $translate) ->
     template = $template.get("common/components/list-item-assigned-to-avatar.html", true)
 
     link = ($scope, $el, $attrs) ->
         bindOnce $scope, "usersById", (usersById) ->
             item = $scope.$eval($attrs.tgListitemAssignedto)
-            ctx = {name: "Unassigned", imgurl: "/" + window._version + "/images/unnamed.png"}
+            ctx = {
+                name: $translate.instant("COMMON.ASSIGNED_TO.NOT_ASSIGNED"),
+                imgurl: "/#{window._version}/images/unnamed.png"
+            }
 
             member = usersById[item.assigned_to]
             if member
@@ -728,7 +739,7 @@ ListItemAssignedtoDirective = ($template) ->
 
     return {link:link}
 
-module.directive("tgListitemAssignedto", ["$tgTemplate", ListItemAssignedtoDirective])
+module.directive("tgListitemAssignedto", ["$tgTemplate", "$translate", ListItemAssignedtoDirective])
 
 
 ListItemIssueStatusDirective = ->
@@ -844,7 +855,7 @@ module.directive("tgProgressBar", ["$tgTemplate", TgProgressBarDirective])
 TgMainTitleDirective = ($translate) ->
     link = ($scope, $el, $attrs) ->
         $attrs.$observe "i18nSectionName", (i18nSectionName) ->
-            $scope.sectionName = $translate.instant(i18nSectionName)
+            $scope.sectionName = i18nSectionName
 
         $scope.$on "$destroy", ->
             $el.off()
