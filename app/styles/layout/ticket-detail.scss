@@ -1,5 +1,5 @@
 .us-story-main-data {
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     header {
         align-content: center;
         align-items: stretch;
@@ -10,9 +10,12 @@
     .us-title {
         @extend %large;
         @extend %text;
+        align-items: flex-start;
         background: $whitish;
+        display: flex;
         flex: 1;
-        padding: 1rem;
+        flex-direction: column;
+        padding: .5rem;
         position: relative;
         transition: all .2s linear;
         &.blocked {
@@ -55,20 +58,25 @@
             align-content: center;
             align-items: center;
             display: flex;
+            width: 100%;
         }
         input {
             background: $white;
-            flex-grow: 9;
+            flex-grow: 1;
         }
         .save-container {
             flex-grow: 1;
         }
         .us-title-text {
+            @extend %larger;
+            @extend %text;
             align-content: center;
             align-items: center;
             display: flex;
+            flex: 1;
             margin-bottom: 0;
-            max-width: 94%;
+            max-width: 92%;
+            width: 100%;
         }
         .us-title-text:hover {
             .icon-edit {
@@ -77,17 +85,16 @@
             }
         }
         .us-number {
-            @extend %xlarge;
-            @extend %title;
+            @extend %text;
             color: $gray-light;
             flex-shrink: 0;
             line-height: 2.2rem;
             margin-right: .5rem;
         }
         .us-name {
-            @extend %xlarge;
-            color: $grayer;
+            color: $gray;
             display: inline-block;
+            flex-grow: 1;
             line-height: 2.2rem;
             padding-right: 1rem;
             width: 100%;
@@ -165,7 +172,32 @@
     }
 }
 
+.subheader {
+    display: flex;
+    justify-content: space-between;
+    @include breakpoint(laptop) {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+    .ticket-created-by {
+        flex: 1;
+        flex-basis: 250px;
+        @include breakpoint(laptop) {
+            flex: 0;
+            order: 1;
+        }
+    }
+    .tags-block {
+        flex: 3;
+        @include breakpoint(laptop) {
+            flex: 0;
+            order: 2;
+        }
+    }
+}
+
 .duty-content {
+    @include cursor-progress;
     position: relative;
     &:hover {
         .view-description {
