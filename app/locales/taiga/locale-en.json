@@ -707,7 +707,9 @@
                 "WATCHED_TAB": "Watched",
                 "WATCHED_TAB_TITLE": "List all item watched by this user",
                 "CONTACTS_TAB": "Contacts",
-                "CONTACTS_TAB_TITLE": "List all contacts made by this user"
+                "CONTACTS_TAB_TITLE": "List all contacts made by this user",
+                "WORKSPACE_TAB": "Workspace",
+                "WORKSPACE_TAB_TITLE": "List all content current user workspace"
             }
         },
         "PROFILE_SIDEBAR": {
@@ -728,7 +730,21 @@
             "FILTER_TYPE_ISSUES": "Issues",
             "FILTER_TYPE_ISSUES_TITLE": "Show only issues",
             "EMPTY_TITLE": "It looks like there's nothing to show here."
-        }
+        },
+      "PROFILE_WORKSPACE": {
+        "FILTER_INPUT_PLACEHOLDER": "Type something...",
+        "FILTER_TYPE_ALL": "All",
+        "FILTER_TYPE_ALL_TITLE": "Show all",
+        "FILTER_TYPE_PROJECTS": "Projects",
+        "FILTER_TYPE_PROJECT_TITLES": "Show only projects",
+        "FILTER_TYPE_USER_STORIES": "Stories",
+        "FILTER_TYPE_USER_STORIES_TITLES": "Show only user stories",
+        "FILTER_TYPE_TASKS": "Tasks",
+        "FILTER_TYPE_TASK_TITLES": "Show only tasks",
+        "FILTER_TYPE_ISSUES": "Issues",
+        "FILTER_TYPE_ISSUES_TITLE": "Show only issues",
+        "EMPTY_TITLE": "It looks like there's nothing to show here."
+      }
     },
     "PROJECT": {
         "PAGE_TITLE": "{{projectName}}",

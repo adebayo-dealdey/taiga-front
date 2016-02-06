@@ -5,10 +5,13 @@
         margin-right: 2rem;
     }
     .project-list {
-        width: 250px;
+        width: 500px;
     }
     .see-more-projects-btn {
         display: block;
+        width: 500px;
+        height: 32px;
+        float: left;
     }
     .title-bar {
         @extend %light;
