@@ -268,6 +268,7 @@ module.directive("tgBlockingMessageInput", ["$log", "$tgTemplate", "$compile", B
 
 CreateEditUserstoryDirective = ($repo, $model, $rs, $rootScope, lightboxService, $loading, $translate, $confirm, $q, attachmentsService) ->
     link = ($scope, $el, attrs) ->
+        form = null
         $scope.createEditUs = {}
         $scope.isNew = true
 
@@ -285,6 +286,7 @@ CreateEditUserstoryDirective = ($repo, $model, $rs, $rootScope, lightboxService,
             attachmentsToDelete = attachmentsToDelete.push(attachment)
 
         $scope.$on "usform:new", (ctx, projectId, status, statusList) ->
+            form.reset() if form
             $scope.isNew = true
             $scope.usStatusList = statusList
             $scope.attachments = Immutable.List()
@@ -312,6 +314,8 @@ CreateEditUserstoryDirective = ($repo, $model, $rs, $rootScope, lightboxService,
             lightboxService.open($el)
 
         $scope.$on "usform:edit", (ctx, us, attachments) ->
+            form.reset() if form
+
             $scope.us = us
             $scope.attachments = Immutable.fromJS(attachments)
             $scope.isNew = false
@@ -431,7 +435,11 @@ module.directive("tgLbCreateEditUserstory", [
 
 CreateBulkUserstoriesDirective = ($repo, $rs, $rootscope, lightboxService, $loading) ->
     link = ($scope, $el, attrs) ->
+        form = null
+
         $scope.$on "usform:bulk", (ctx, projectId, status) ->
+            form.reset() if form
+
             $scope.new = {
                 projectId: projectId
                 statusId: status
@@ -505,7 +513,7 @@ AssignedToLightboxDirective = (lightboxService, lightboxKeyboardNavigationServic
             username = normalizeString(username)
             text = text.toUpperCase()
             text = normalizeString(text)
-            return _.contains(username, text)
+            return _.includes(username, text)
 
         render = (selected, text) ->
             users = _.clone($scope.activeUsers, true)
@@ -514,7 +522,7 @@ AssignedToLightboxDirective = (lightboxService, lightboxKeyboardNavigationServic
 
             ctx = {
                 selected: selected
-                users: _.first(users, 5)
+                users: _.slice(users, 0, 5)
                 showMore: users.length > 5
             }
 
@@ -600,7 +608,7 @@ WatchersLightboxDirective = ($repo, lightboxService, lightboxKeyboardNavigationS
 
                 username = user.full_name_display.toUpperCase()
                 text = text.toUpperCase()
-                return _.contains(username, text)
+                return _.includes(username, text)
 
             users = _.clone($scope.activeUsers, true)
             users = _.filter(users, _.partial(_filterUsers, text))
@@ -610,7 +618,7 @@ WatchersLightboxDirective = ($repo, lightboxService, lightboxKeyboardNavigationS
         render = (users) ->
             ctx = {
                 selected: false
-                users: _.first(users, 5)
+                users: _.slice(users, 0, 5)
                 showMore: users.length > 5
             }
 

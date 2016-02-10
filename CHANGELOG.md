@@ -1,6 +1,16 @@
 # Changelog #
 
 
+## 2.0.0 ??? (unreleased)
+
+### Features
+- Ability to create url custom fields. (thanks to [@astagi](https://github.com/astagi)).
+- Moved from iconfont to SVG sprite icon system and redesign.
+
+### Misc
+- Lots of small and not so small bugfixes.
+
+
 ## 1.10.0 Dryas Octopetala (2016-01-30)
 
 ### Features
