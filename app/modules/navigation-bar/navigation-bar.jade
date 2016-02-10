@@ -26,10 +26,18 @@ nav.navbar(ng-if="vm.isEnabledHeader")
         ) {{ 'REGISTER_FORM.ACTION_SIGN_UP' | translate }}
 
     div.nav-right(ng-if="vm.isAuthenticated")
-        a(tg-nav="home",
-          ng-class="{active: vm.active}",
-          title="{{'PROJECT.NAVIGATION.DASHBOARD_TITLE' | translate}}")
+        a(
+            href="#",
+            tg-nav="projects",
+            title="Projects"
+        )
+            include ../../svg/activity.svg
 
+        a(
+            tg-nav="home",
+            ng-class="{active: vm.active}",
+            title="{{'PROJECT.NAVIGATION.DASHBOARD_TITLE' | translate}}"
+        )
             include ../../svg/dashboard.svg
 
         a(
