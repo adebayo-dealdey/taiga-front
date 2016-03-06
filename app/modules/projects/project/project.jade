@@ -8,7 +8,7 @@ div.wrapper
                 title="{{::project.get('name')}}"
             )
                 img(
-                    tg-project-logo-src="vm.project"
+                    tg-project-logo-big-src="vm.project"
                     alt="{{::vm.project.get('name')}}"
                 )
             .single-project-title-wrapper
@@ -63,7 +63,7 @@ div.wrapper
                         title="{{'PROJECT.LOOKING_FOR_PEOPLE' | translate}}"
                     )
                     h3 {{'PROJECT.LOOKING_FOR_PEOPLE' | translate}}
-                    p(ng-if="vm.project.get('looking_for_people_note')") {{::vm.project.get('looking_for_people_note')}}"
+                    p(ng-if="vm.project.get('looking_for_people_note')") {{::vm.project.get('looking_for_people_note')}}
                 h2.title {{"PROJECT.SECTION.TEAM" | translate}}
                 ul.involved-team
                     li(tg-repeat="member in vm.members")
@@ -72,3 +72,6 @@ div.wrapper
                             title="{{::member.get('full_name')}}"
                         )
                             img(ng-src="{{::member.get('photo')}}", alt="{{::member.get('full_name')}}")
+                            svg.icon.icon-badge(ng-if="member.get('id') == vm.project.getIn(['owner', 'id'])")
+                                use(xlink:href="#icon-badge")
+                                    title(translate="COMMON.OWNER")

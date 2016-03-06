@@ -23,6 +23,7 @@
                 li.list-itemtype-project(
                     tg-bind-scope
                     tg-repeat="project in vm.projects track by project.get('id')"
+                    ng-class="{'blocked-project': project.get('blocked_code')}"
                 )
                     .list-itemtype-project-left
 
@@ -33,12 +34,12 @@
                                 title="{{ ::project.get('name') }}"
                             )
                                 img(
-                                    tg-project-logo-src="::project"
+                                    tg-project-logo-small-src="::project"
                                     alt="{{::project.get('name')}}"
                                 )
                             .list-itemtype-project-data
                                 h2
-                                    a(
+                                    a.project-title(
                                         href="#"
                                         tg-nav="project:project=project.get('slug')"
                                         title="{{ ::project.get('name') }}"
@@ -49,15 +50,17 @@
                                     )
                                         svg.icon.icon-lock
                                             use(xlink:href="#icon-lock")
-                                p {{ ::project.get('description') | limitTo:300 }}
+                                    
+                                    svg.icon.icon-badge(ng-if="project.get('i_am_owner')")
+                                        use(xlink:href="#icon-badge")
+                                            title(translate="COMMON.OWNER")
+                                    svg.icon.icon-blocked-project(ng-if="project.get('blocked_code')")
+                                        use(xlink:href="#icon-blocked-project")
+                                            title(translate="PROJECT.BLOCKED_PROJECT.BLOCKED")
+                                            
+                                            
+                                p.project-description {{ ::project.get('description') | limitTo:300 }}
                                     span(ng-if="::project.get('description').length > 300") ...
-
-                        .list-itemtype-project-tags.tag-container(ng-if="::project.get('tags').size")
-                            span.tag(
-                                style='border-left: 5px solid {{::tag.get("color")}};'
-                                tg-repeat="tag in ::project.get('colorized_tags')"
-                            )
-                                span.tag-name {{::tag.get('name')}}
 
                     svg.drag.icon.icon-drag
                         use(xlink:href="#icon-drag")

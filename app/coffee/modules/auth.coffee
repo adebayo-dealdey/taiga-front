@@ -27,6 +27,19 @@ debounce = @.taiga.debounce
 
 module = angular.module("taigaAuth", ["taigaResources"])
 
+class LoginPage
+    @.$inject = [
+        'tgCurrentUserService',
+        '$location',
+        '$tgNavUrls'
+    ]
+
+    constructor: (currentUserService, $location, $navUrls) ->
+        if currentUserService.isAuthenticated()
+            $location.path($navUrls.resolve("home"))
+
+module.controller('LoginPage', LoginPage)
+
 #############################################################################
 ## Authentication Service
 #############################################################################
@@ -122,6 +135,17 @@ class AuthService extends taiga.Service
         return false
 
     ## Http interface
+    refresh: () ->
+        url = @urls.resolve("user-me")
+
+        return @http.get(url).then (data, status) =>
+            user = data.data
+            user.token = @.getUser().auth_token
+
+            user = @model.make_model("users", user)
+
+            @.setUser(user)
+            return user
 
     login: (data, type) ->
         url = @urls.resolve("auth")
@@ -286,15 +310,10 @@ RegisterDirective = ($auth, $confirm, $location, $navUrls, $config, $routeParams
         $scope.data = {}
         form = $el.find("form").checksley({onlyOneErrorElement: true})
 
-        if $routeParams['next'] and $routeParams['next'] != $navUrls.resolve("register")
-            $scope.nextUrl = decodeURIComponent($routeParams['next'])
-        else
-            $scope.nextUrl = $navUrls.resolve("home")
+        $scope.nextUrl = $navUrls.resolve("home")
 
         onSuccessSubmit = (response) ->
             $analytics.trackEvent("auth", "register", "user registration", 1)
-
-            $confirm.notify("success", $translate.instant("LOGIN_FORM.SUCCESS"))
 
             $location.url($scope.nextUrl)
 

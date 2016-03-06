@@ -51,11 +51,13 @@ class ProjectProfileController extends mixOf(taiga.Controller, taiga.PageMixin)
         "$tgLocation",
         "$tgNavUrls",
         "tgAppMetaService",
-        "$translate"
+        "$translate",
+        "$tgAuth",
+        "tgCurrentUserService"
     ]
 
     constructor: (@scope, @rootscope, @repo, @confirm, @rs, @params, @q, @location, @navUrls,
-                  @appMetaService, @translate) ->
+                  @appMetaService, @translate, @tgAuth, @currentUserService) ->
         @scope.project = {}
 
         promise = @.loadInitialData()
@@ -66,6 +68,11 @@ class ProjectProfileController extends mixOf(taiga.Controller, taiga.PageMixin)
                      sectionName: sectionName, projectName: @scope.project.name})
             description = @scope.project.description
             @appMetaService.setAll(title, description)
+
+            @scope.canBePrivateProject = @.currentUserService.canBePrivateProject(@scope.project.id)
+            @scope.canBePublicProject = @.currentUserService.canBePublicProject(@scope.project.id)
+
+            @scope.isPrivateProject = @scope.project.is_private
 
         promise.then null, @.onInitialDataError.bind(@)
 
@@ -78,7 +85,7 @@ class ProjectProfileController extends mixOf(taiga.Controller, taiga.PageMixin)
 
     loadProject: ->
         return @rs.projects.getBySlug(@params.pslug).then (project) =>
-            if not project.i_am_owner
+            if not project.i_am_admin
                 @location.path(@navUrls.resolve("permission-denied"))
 
             @scope.projectId = project.id
@@ -94,8 +101,10 @@ class ProjectProfileController extends mixOf(taiga.Controller, taiga.PageMixin)
             return project
 
     loadInitialData: ->
-        promise = @.loadProject()
-        return promise
+        return @q.all([
+            @.loadProject(),
+            @tgAuth.refresh()
+        ])
 
     openDeleteLightbox: ->
         @rootscope.$broadcast("deletelightbox:new", @scope.project)
@@ -198,40 +207,50 @@ ProjectModulesDirective = ($repo, $confirm, $loading, projectService) ->
     link = ($scope, $el, $attrs) ->
         submit = =>
             form = $el.find("form").checksley()
+            form.initializeFields() # Need to reset the form constrains
+            form.reset() # Need to reset the form constrains
             return if not form.validate()
-
-            target = angular.element(".admin-functionalities .submit-button")
-            currentLoading = $loading()
-                .target(target)
-                .start()
 
             promise = $repo.save($scope.project)
             promise.then ->
-                currentLoading.finish()
-                $confirm.notify("success")
                 $scope.$emit("project:loaded", $scope.project)
+                $confirm.notify("success")
 
                 projectService.fetchProject()
 
             promise.then null, (data) ->
-                currentLoading.finish()
-                $confirm.notify("error", data._error_message)
+                form.setErrors(data)
+                if data._error_message
+                    $confirm.notify("error", data._error_message)
+
+        $el.on "change", ".module-activation.module-direct-active input", (event) ->
+            event.preventDefault()
+            submit()
 
         $el.on "submit", "form", (event) ->
             event.preventDefault()
             submit()
 
-        $el.on "click", ".admin-functionalities a.button-green", (event) ->
+        $el.on "click", ".icon-save", (event) ->
             event.preventDefault()
             submit()
 
-        $scope.$watch "isVideoconferenceActivated", (isVideoconferenceActivated) ->
-            if isVideoconferenceActivated
-                $el.find(".videoconference-attributes").removeClass("hidden")
-            else
-                $el.find(".videoconference-attributes").addClass("hidden")
+        $el.on "keydown", ".videoconference-attributes input", (e) ->
+            return e.which != 32
+
+        $scope.$watch "project.videoconferences", (newVal, oldVal) ->
+            # Reset videoconferences_extra_data if videoconference system change
+            if newVal? and oldVal? and newVal != oldVal
+                $scope.project.videoconferences_extra_data = ""
+
+        $scope.$watch "isVideoconferenceActivated", (newValue, oldValue) ->
+            if newValue == false
+                # Reset videoconference attributes
                 $scope.project.videoconferences = null
                 $scope.project.videoconferences_extra_data = ""
+
+                # Save when videoconference is desactivated
+                submit() if oldValue == true
 
         $scope.$watch "project", (project) ->
             if project.videoconferences?
@@ -510,3 +529,15 @@ ProjectLogoModelDirective = ($parse) ->
     return {link:link}
 
 module.directive('tgProjectLogoModel', ['$parse', ProjectLogoModelDirective])
+
+
+AdminProjectRestrictionsDirective = () ->
+    return {
+        scope: {
+            "canBePrivateProject": "=",
+            "canBePublicProject": "="
+        },
+        templateUrl: "admin/admin-project-restrictions.html"
+    }
+
+module.directive('tgAdminProjectRestrictions', [AdminProjectRestrictionsDirective])

@@ -38,6 +38,8 @@ class LightboxService extends taiga.Service
     constructor: (@animationFrame, @q) ->
 
     open: ($el) ->
+        if _.isString($el)
+            $el = $($el)
         defered = @q.defer()
 
         lightboxContent = $el.children().not(".close")
@@ -63,6 +65,8 @@ class LightboxService extends taiga.Service
         return defered.promise
 
     close: ($el) ->
+        if _.isString($el)
+            $el = $($el)
         docEl = angular.element(document)
         docEl.off(".lightbox")
         docEl.off(".keyboard-navigation") # Hack: to fix problems in the WYSIWYG textareas when press ENTER
@@ -70,7 +74,8 @@ class LightboxService extends taiga.Service
             $el.removeAttr('style')
             $el.removeClass("open").removeClass('close')
 
-        $el.addClass('close')
+        @animationFrame.add ->
+            $el.addClass('close')
 
         if $el.hasClass("remove-on-close")
             scope = $el.data("scope")

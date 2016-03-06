@@ -1,8 +1,8 @@
 .lightbox {
     @extend %lightbox;
     h2 {
-        @extend %larger;
-        @extend %text;
+        @extend %xlarge;
+        @extend %light;
     }
 }
 
@@ -325,6 +325,9 @@
 }
 
 .lightbox-delete-account {
+    p {
+        text-align: center;
+    }
     form {
         flex-basis: 420px;
         flex-grow: 0;
@@ -529,8 +532,24 @@
             margin-right: 0;
         }
         &:last-child {
+            flex-basis: 100%;
             margin: .1rem 0;
             min-width: 100%;
         }
+    }
+}
+
+.lightbox-import-error {
+    text-align: center;
+    p {
+        a {
+            color: $primary;
+        }
+    }
+    .content {
+        width: 500px;
+    }
+    h2 {
+        margin-top: 1rem;
     }
 }

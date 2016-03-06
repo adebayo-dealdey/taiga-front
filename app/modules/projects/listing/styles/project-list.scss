@@ -13,6 +13,14 @@
             margin: 0;
         }
     }
+    .icon-lock,
+    .icon-badge,
+    .icon-blocked-project {
+        @include svg-size();
+    }
+    .icon-badge {
+        margin-left: .5rem;
+    }
     .create-project-btn {
         margin-right: .25rem;
         padding: .6rem 2.5rem;
@@ -48,11 +56,21 @@
     .list-itemtype-project {
         background: rgba($white, .6);
         &:hover {
-            background: lighten($primary, 63%);
+            background: rgba($primary-light, .1);
             cursor: move;
             transition: background .3s;
             .drag {
                 opacity: 1;
+            }
+        }
+        &.blocked-project {
+            .list-itemtype-project-image,
+            .project-title,
+            .private,
+            .project-description,
+            .icon-badge,
+            .icon-drag {
+                opacity: .25;
             }
         }
         .list-itemtype-project-data-wrapper {

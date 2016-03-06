@@ -5,7 +5,12 @@
 
 ### Features
 - Ability to create url custom fields. (thanks to [@astagi](https://github.com/astagi)).
+- Blocked projects support
 - Moved from iconfont to SVG sprite icon system and redesign.
+- Redesign 'Admin > Project > Modules' panel.
+- Add badge to project owners
+- Limit of user per project.
+- Redesign of the create project wizard
 
 ### Misc
 - Lots of small and not so small bugfixes.
