@@ -13,7 +13,7 @@
             title="{{::project.get('name')}}"
         )
             img(
-                tg-project-logo-src="::project"
+                tg-project-logo-small-src="::project"
                 alt="{{::project.get('name')}}"
             )
         .project-data-container
@@ -43,15 +43,17 @@
                         include ../../../../svg/eye.svg
                         span {{::project.get('total_watchers')}}
                     span.statistic(
+                        ng-class="{'active': project.get('i_am_member')}"
                         title="{{ 'PROJECT.MEMBERS_COUNTER_TITLE'|translate:{total:project.get('members').size||0}:'messageformat' }}"
                     )
                         include ../../../../svg/team.svg
                         span.statistics-num {{ ::project.get('members').size }}
             p.project-description {{ ::project.get('description') | limitTo:150 }}{{ ::project.get('description').length < 150 ? '' : '...'}}
 
-    a.view-more-projects.button-green(
-        ng-if="highlighted"
-        tg-nav="discover-search"
-        tg-nav-get-params="{\"order_by\": \"{{orderBy}}\"}"
-        href="#"
-    ) {{ 'DISCOVER.VIEW_MORE' | translate }}
+    div(ng-if="!loading")
+        a.view-more-projects.button-green(
+            ng-if="highlighted"
+            tg-nav="discover-search"
+            tg-nav-get-params="{\"order_by\": \"{{orderBy}}\"}"
+            href="#"
+        ) {{ 'DISCOVER.VIEW_MORE' | translate }}
