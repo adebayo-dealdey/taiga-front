@@ -6,12 +6,6 @@
     margin-bottom: 1rem;
     transition: .2s;
     transition-delay: .1s;
-
-    display: block;
-    width: 234px;
-    height: 225px;
-    float: left;
-
     &:hover {
         border: 1px solid $primary-light;
     }

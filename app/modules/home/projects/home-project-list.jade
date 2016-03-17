@@ -23,14 +23,14 @@ section.home-project-list(ng-if="vm.projects.size")
                         href="#"
                         tg-nav="project:project=project.get('slug')"
                         title="{{::project.get('name')}}"
-                    ) {{::project.get('name')| limitTo:25}}
+                    ) {{::project.get('name')}}
                     span.look-for-people(
                         ng-if="project.get('is_looking_for_people')"
                         title="{{ ::project.get('looking_for_people_note') }}"
                     )
                         include ../../../svg/recruit.svg
-            p.project-card-description {{::project.get('description')| limitTo:75 }}
-                 span(ng-if="::project.get('description').length > 75") ...
+            p.project-card-description {{::project.get('description')| limitTo:100 }}
+                 span(ng-if="::project.get('description').length > 100") ...
             .project-card-statistics
                 span.statistic(
                     ng-class="{'active': project.get('is_fan')}"
