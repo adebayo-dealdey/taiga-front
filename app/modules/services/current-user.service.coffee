@@ -118,4 +118,20 @@ class CurrentUserService
 
         return @.projects
 
+    canCreatePrivateProjects: () ->
+        user = @.getUser()
+
+        if user.get('max_private_projects') != null && user.get('max_private_projects') <= user.get('total_private_projects')
+            return {valid: false, reason: 'max_private_projects', type: 'private_project'}
+
+        return {valid: true}
+
+    canCreatePublicProjects: () ->
+        user = @.getUser()
+
+        if user.get('max_public_projects') != null && user.get('max_public_projects') <= user.get('total_public_projects')
+            return {valid: false, reason: 'max_public_projects', type: 'public_project'}
+
+        return {valid: true}
+
 angular.module("taigaCommon").service("tgCurrentUserService", CurrentUserService)

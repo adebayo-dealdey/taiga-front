@@ -55,6 +55,7 @@ a {
 input[type="text"],
 input[type="number"],
 input[type="password"],
+input[type="url"],
 input[type="email"],
 input[type="date"],
 input[type="password"],
@@ -134,7 +135,7 @@ tg-project-menu {
         background: $whitish;
         border-top: 3px solid $gray-light;
         .icon {
-            color: $gray-light;
+            fill: $gray-light;
         }
     }
 }

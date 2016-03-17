@@ -88,7 +88,7 @@ class HistoryController extends taiga.Controller
         return @rs.history.undeleteComment(type, objectId, activityId).then => @.loadHistory(type, objectId)
 
 
-HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $compile, $navUrls, $rootScope) ->
+HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $compile, $navUrls, $rootScope, checkPermissionsService) ->
     templateChangeDiff = $template.get("common/history/history-change-diff.html", true)
     templateChangePoints = $template.get("common/history/history-change-points.html", true)
     templateChangeGeneric = $template.get("common/history/history-change-generic.html", true)
@@ -343,13 +343,39 @@ HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $c
 
         # Render into DOM (operations with dom mutability)
 
+        renderBase = ->
+            comments = $scope.comments or []
+            changes = $scope.history or []
+
+            historyVisible = !!changes.length
+            commentsVisible = (!!comments.length) || checkPermissionsService.check('modify_' + $attrs.type)
+
+            html = templateBase({
+                ngmodel: $attrs.ngModel,
+                type: $attrs.type,
+                mode: $attrs.mode,
+                historyVisible: historyVisible,
+                commentsVisible: commentsVisible
+            })
+
+            html = $compile(html)($scope)
+
+            $el.html(html)
+
+        rerender = ->
+            renderBase()
+            renderComments()
+            renderActivity()
+
         renderComments = ->
             comments = $scope.comments or []
             totalComments = comments.length
-            if not showAllComments
-                comments = _.last(comments, 4)
 
-            comments = _.map(comments, (x) -> renderComment(x))
+            if not showAllComments
+                comments = _.takeRight(comments, 4)
+
+            comments = _.map comments, (x) -> renderComment(x)
+
             html = renderHistory(comments, totalComments)
             $el.find(".comments-list").html(html)
 
@@ -357,7 +383,7 @@ HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $c
             changes = $scope.history or []
             totalChanges = changes.length
             if not showAllActivity
-                changes = _.last(changes, 4)
+                changes = _.takeRight(changes, 4)
 
             changes = _.map(changes, (x) -> renderChange(x))
             html = renderHistory(changes, totalChanges)
@@ -388,8 +414,8 @@ HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $c
 
         # Watchers
 
-        $scope.$watch("comments", renderComments)
-        $scope.$watch("history",  renderActivity)
+        $scope.$watch("comments", rerender)
+        $scope.$watch("history",  rerender)
 
         $scope.$on("object:updated", -> $ctrl.loadHistory(type, objectId))
 
@@ -467,14 +493,10 @@ HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $c
         $scope.$on "$destroy", ->
             $el.off()
 
-    templateFn = ($el, $attrs) ->
-        html = templateBase({ngmodel: $attrs.ngModel, type: $attrs.type, mode: $attrs.mode})
-
-        return html
+        renderBase()
 
     return {
         controller: HistoryController
-        template: templateFn
         restrict: "AE"
         link: link
         # require: ["ngModel", "tgHistory"]
@@ -482,4 +504,4 @@ HistoryDirective = ($log, $loading, $qqueue, $template, $confirm, $translate, $c
 
 
 module.directive("tgHistory", ["$log", "$tgLoading", "$tgQqueue", "$tgTemplate", "$tgConfirm", "$translate",
-                               "$compile", "$tgNavUrls", "$rootScope", HistoryDirective])
+                               "$compile", "$tgNavUrls", "$rootScope", "tgCheckPermissionsService", HistoryDirective])

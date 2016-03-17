@@ -62,7 +62,7 @@ RelatedTaskRowDirective = ($repo, $compile, $confirm, $rootscope, $loading, $tem
                 else if event.keyCode == 27
                     renderView($model.$modelValue)
 
-            $el.on "click", ".icon-floppy", (event) ->
+            $el.on "click", ".save-task", (event) ->
                 saveTask($model.$modelValue).then ->
                     renderView($model.$modelValue)
 
@@ -79,7 +79,7 @@ RelatedTaskRowDirective = ($repo, $compile, $confirm, $rootscope, $loading, $tem
 
             $el.html($compile(templateView({task: task, perms: perms}))($scope))
 
-            $el.on "click", ".icon-edit", ->
+            $el.on "click", ".edit-task", ->
                 renderEdit($model.$modelValue)
                 $el.find('input').focus().select()
 
@@ -170,10 +170,10 @@ RelatedTaskCreateFormDirective = ($repo, $compile, $confirm, $tgmodel, $loading,
                 else if event.keyCode == 27
                     $scope.$apply () -> close()
 
-            $el.on "click", ".icon-delete", (event)->
+            $el.on "click", ".icon-close", (event)->
                 $scope.$apply () -> close()
 
-            $el.on "click", ".icon-floppy", (event)->
+            $el.on "click", ".icon-save", (event)->
                 createTask(newTask).then ->
                     close()
 
@@ -226,6 +226,19 @@ RelatedTasksDirective = ($repo, $rs, $rootscope) ->
             return $rs.tasks.list($scope.projectId, null, $scope.usId).then (tasks) =>
                 $scope.tasks = _.sortBy(tasks, 'ref')
                 return tasks
+
+        _isVisible = ->
+            if $scope.project
+                return $scope.project.my_permissions.indexOf("view_tasks") != -1
+            return false
+
+        _isEditable = ->
+            if $scope.project
+                return $scope.project.my_permissions.indexOf("modify_task") != -1
+            return false
+
+        $scope.showRelatedTasks = ->
+            return _isVisible() && ( _isEditable() ||  $scope.tasks?.length )
 
         $scope.$on "related-tasks:add", ->
             loadTasks().then ->

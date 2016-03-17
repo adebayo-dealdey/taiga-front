@@ -47,11 +47,12 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
         "$tgNavUrls",
         "$tgAnalytics",
         "tgAppMetaService",
-        "$translate"
+        "$translate",
+        "$tgAuth"
     ]
 
     constructor: (@scope, @rootscope, @repo, @confirm, @rs, @params, @q, @location, @navUrls, @analytics,
-                  @appMetaService, @translate) ->
+                  @appMetaService, @translate, @tgAuth) ->
         bindMethods(@)
 
         @scope.project = {}
@@ -63,6 +64,7 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
            title = @translate.instant("ADMIN.MEMBERSHIPS.PAGE_TITLE", {projectName:  @scope.project.name})
            description = @scope.project.description
            @appMetaService.setAll(title, description)
+           @._checkUsersLimit()
 
         promise.then null, @.onInitialDataError.bind(@)
 
@@ -72,16 +74,18 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
 
     loadProject: ->
         return @rs.projects.getBySlug(@params.pslug).then (project) =>
-            if not project.i_am_owner
+            if not project.i_am_admin
                 @location.path(@navUrls.resolve("permission-denied"))
 
             @scope.projectId = project.id
             @scope.project = project
             @scope.$emit('project:loaded', project)
+
             return project
 
     loadMembers: ->
         httpFilters = @.getUrlFilters()
+
         return @rs.memberships.list(@scope.projectId, httpFilters).then (data) =>
             @scope.memberships = _.filter(data.models, (membership) ->
                                     membership.user == null or membership.is_user_active)
@@ -92,11 +96,11 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
             return data
 
     loadInitialData: ->
-        promise = @.loadProject()
-        promise.then =>
-            @.loadMembers()
-
-        return promise
+        return @.loadProject().then () =>
+            return @q.all([
+                @.loadMembers(),
+                @tgAuth.refresh()
+            ])
 
     getUrlFilters: ->
         filters = _.pick(@location.search(), "page")
@@ -106,6 +110,15 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
     addNewMembers:  ->
         @rootscope.$broadcast("membersform:new")
 
+    _checkUsersLimit: ->
+        @scope.canAddUsers = @.project.get('total_memberships') > @.project.get('max_memberships')
+        @.maxMembers = @.project.get('max_memberships')
+
+    limitUsersWarning: ->
+        title = @translate.instant("ADMIN.MEMBERSHIPS.LIMIT_USERS_WARNING")
+        message = @translate.instant("ADMIN.MEMBERSHIPS.LIMIT_USERS_WARNING_MESSAGE", {members: @.maxMembers})
+        icon = "/" + window._version + "/svg/icons/team-question.svg"
+        @confirm.success(title, message,icon)
 
 module.controller("MembershipsController", MembershipsController)
 
@@ -224,6 +237,7 @@ MembershipsRowAvatarDirective = ($log, $template, $translate) ->
                 email: if member.user_email then member.user_email else member.email
                 imgurl: if member.photo then member.photo else "/" + window._version + "/images/unnamed.png"
                 pending: if !member.is_user_active then pending else ""
+                isOwner: member.is_owner
             }
 
             html = template(ctx)
@@ -266,7 +280,7 @@ MembershipsRowAdminCheckboxDirective = ($log, $repo, $confirm, $template, $compi
         member = $scope.$eval($attrs.tgMembershipsRowAdminCheckbox)
         html = render(member)
 
-        if member.is_owner
+        if member.is_admin
             $el.find(":checkbox").prop("checked", true)
 
         $el.on "click", ":checkbox", (event) =>
@@ -275,11 +289,11 @@ MembershipsRowAdminCheckboxDirective = ($log, $repo, $confirm, $template, $compi
 
             onError = (data) ->
                 member.revert()
-                $el.find(":checkbox").prop("checked", member.is_owner)
-                $confirm.notify("error", data.is_owner[0])
+                $el.find(":checkbox").prop("checked", member.is_admin)
+                $confirm.notify("error", data.is_admin[0])
 
             target = angular.element(event.currentTarget)
-            member.is_owner = target.prop("checked")
+            member.is_admin = target.prop("checked")
             $repo.save(member).then(onSuccess, onError)
 
         $scope.$on "$destroy", ->
@@ -359,7 +373,9 @@ MembershipsRowActionsDirective = ($log, $repo, $rs, $confirm, $compile, $transla
     </div>
     <a class="delete" href=""
        title="{{ 'ADMIN.MEMBERSHIP.DELETE_MEMBER' | translate }}">
-        <span class="icon icon-delete"></span>
+        <svg class="icon icon-trash">
+            <use xlink:href="#icon-trash">
+        </svg>
     </a>
     """
 
@@ -370,7 +386,9 @@ MembershipsRowActionsDirective = ($log, $repo, $rs, $confirm, $compile, $transla
     </a>
     <a class="delete" href=""
        title="{{ 'ADMIN.MEMBERSHIP.DELETE_MEMBER' | translate }}">
-        <span class="icon icon-delete"></span>
+        <svg class="icon icon-trash">
+            <use xlink:href="#icon-trash">
+        </svg>
     </a>
     """
 

@@ -78,6 +78,7 @@ a {
 input[type="text"],
 input[type="number"],
 input[type="password"],
+input[type="url"],
 input[type="email"],
 input[type="date"],
 input[type="password"],
@@ -179,7 +180,7 @@ tg-project-menu {
         background: lighten($white, 20%);
         border-top: 3px solid $black;
         .icon {
-            color: $black;
+            fill: $black;
         }
     }
 }
