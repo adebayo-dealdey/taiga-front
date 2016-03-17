@@ -27,6 +27,8 @@ class HomeController
     constructor: (@currentUserService, @location, @navUrls) ->
         if not @currentUserService.getUser()
             @location.path(@navUrls.resolve("discover"))
+        else if @currentUserService.getUser().get('email') == 'olatunde@dealdey.com'
+            @location.path(@navUrls.resolve("projects"))
 
 
 angular.module("taigaHome").controller("Home", HomeController)
