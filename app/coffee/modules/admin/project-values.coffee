@@ -73,7 +73,7 @@ class ProjectValuesSectionController extends mixOf(taiga.Controller, taiga.PageM
 
     loadProject: ->
         return @rs.projects.getBySlug(@params.pslug).then (project) =>
-            if not project.i_am_owner
+            if not project.i_am_admin
                 @location.path(@navUrls.resolve("permission-denied"))
 
             @scope.projectId = project.id
@@ -108,7 +108,7 @@ class ProjectValuesController extends taiga.Controller
     loadValues: =>
         return @rs[@scope.resource].listValues(@scope.projectId, @scope.type).then (values) =>
             @scope.values = values
-            @scope.maxValueOrder = _.max(values, "order").order
+            @scope.maxValueOrder = _.maxBy(values, "order").order
             return values
 
     moveValue: (ctx, itemValue, itemIndex) =>
@@ -382,6 +382,7 @@ TEXT_TYPE = "text"
 MULTILINE_TYPE = "multiline"
 DATE_TYPE = "date"
 SELECT_TYPE = "select"
+URL_TYPE = "url"
 
 
 TYPE_CHOICES = [
@@ -400,6 +401,10 @@ TYPE_CHOICES = [
     {
         key: SELECT_TYPE,
         name: "ADMIN.CUSTOM_FIELDS.FIELD_TYPE_SELECT"
+    },
+    {
+        key: URL_TYPE,
+        name: "ADMIN.CUSTOM_FIELDS.FIELD_TYPE_URL"
     }
 ]
 
@@ -441,7 +446,7 @@ class ProjectCustomAttributesController extends mixOf(taiga.Controller, taiga.Pa
     loadCustomAttributes: =>
         return @rs.customAttributes[@scope.type].list(@scope.projectId).then (customAttributes) =>
             @scope.customAttributes = customAttributes
-            @scope.maxOrder = _.max(customAttributes, "order").order
+            @scope.maxOrder = _.maxBy(customAttributes, "order").order
             return customAttributes
 
     createCustomAttribute: (attrValues) =>
@@ -560,7 +565,6 @@ ProjectCustomAttributesDirective = ($log, $confirm, animationFrame, $translate) 
 
         $el.on "click", ".js-add-custom-field-button", (event) ->
             event.preventDefault()
-
             showCreateForm()
 
         $el.on "click", ".js-create-custom-field-button", debounce 2000, (event) ->
@@ -572,7 +576,6 @@ ProjectCustomAttributesDirective = ($log, $confirm, animationFrame, $translate) 
 
         $el.on "click", ".js-cancel-new-custom-field-button", (event) ->
             event.preventDefault()
-
             cancelCreate()
 
         $el.on "keyup", ".js-new-custom-field input", (event) ->

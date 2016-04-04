@@ -467,14 +467,14 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
         showFilters = (title, type) ->
             $el.find(".filters-cats").hide()
             $el.find(".filter-list").removeClass("hidden")
-            $el.find("h2.breadcrumb").removeClass("hidden")
-            $el.find("h2 a.subfilter span.title").html(title)
-            $el.find("h2 a.subfilter span.title").prop("data-type", type)
+            $el.find(".breadcrumb").removeClass("hidden")
+            $el.find("h2 .subfilter .title").html(title)
+            $el.find("h2 .subfilter .title").prop("data-type", type)
 
         showCategories = ->
             $el.find(".filters-cats").show()
             $el.find(".filter-list").addClass("hidden")
-            $el.find("h2.breadcrumb").addClass("hidden")
+            $el.find(".breadcrumb").addClass("hidden")
 
         initializeSelectedFilters = (filters) ->
             selectedFilters = []
@@ -508,7 +508,7 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
             $el.find(".filter-list").html(html)
 
         getFiltersType = () ->
-            return $el.find("h2 a.subfilter span.title").prop('data-type')
+            return $el.find(".subfilter .title").prop('data-type')
 
         reloadIssues = () ->
             currentFiltersType = getFiltersType()
@@ -628,7 +628,7 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
 
             toggleFilterSelection(type, id)
 
-        $el.on "click", ".filter-list .single-filter .icon-delete", (event) ->
+        $el.on "click", ".filter-list .single-filter .remove-filter", (event) ->
             event.preventDefault()
             event.stopPropagation()
 
@@ -676,7 +676,7 @@ IssuesFiltersDirective = ($q, $log, $location, $rs, $confirm, $loading, $templat
                         currentLoading.finish()
                         $scope.filters.myFilters = filters
 
-                        currentfilterstype = $el.find("h2 a.subfilter span.title").prop('data-type')
+                        currentfilterstype = $el.find("h2 .subfilter .title").prop('data-type')
                         if currentfilterstype == "myFilters"
                             renderFilters($scope.filters.myFilters)
 
