@@ -61,11 +61,11 @@ input[type="date"],
 input[type="password"],
 select,
 textarea {
-    background: $whitish;
+    background: lighten($whitish, 6%);
     border-color: $gray-light;
     color: $grayer;
     @include placeholder {
-        color: darken($gray-light, 10%);
+        color: lighten($gray-light, 10%);
     }
     &.checksley-error {
         border: 1px solid $red;
@@ -132,7 +132,7 @@ tg-project-menu {
 //Taskboard table
 .taskboard-table-header {
     .task-colum-name {
-        background: $whitish;
+        background: lighten($whitish, 5%);
         border-top: 3px solid $gray-light;
         .icon {
             fill: $gray-light;
@@ -141,7 +141,7 @@ tg-project-menu {
 }
 .taskboard-table-body {
     .taskboard-tasks-box {
-        background: $whitish;
+        background: lighten($whitish, 5%);
     }
 }
 
@@ -152,7 +152,7 @@ tg-project-menu {
 //Kanban table
 .kanban-table-header {
     .task-colum-name {
-        background: $whitish;
+        background: lighten($whitish, 5%);
         border-top: 3px solid $gray-light;
         .icon {
             color: $gray-light;
@@ -162,6 +162,6 @@ tg-project-menu {
 
 .kanban-table-body {
     .kanban-uses-box {
-        background: $whitish;
+        background: lighten($whitish, 5%);
     }
 }

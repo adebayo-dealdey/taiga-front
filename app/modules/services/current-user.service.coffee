@@ -118,61 +118,9 @@ class CurrentUserService
 
         return @.projects
 
-    canAddMoreMembersInPrivateProjects: (projectId) ->
-        project = @.projects.get('all').find (project) -> project.get('id') == projectId
-        user = @.getUser()
-
-        if user.get('max_members_private_projects') != null && project.get('members').size >= user.get('max_members_private_projects')
-            return {valid: false, reason: 'max_members_private_projects', type: 'private_project'}
-
-        return {valid: true}
-
-    canAddMoreMembersInPublicProjects: (projectId) ->
-        project = @.projects.get('all').find (project) -> project.get('id') == projectId
-        user = @.getUser()
-
-        if user.get('max_members_public_projects') != null && project.get('members').size >= user.get('max_members_public_projects')
-            return {valid: false, reason: 'max_members_public_projects', type: 'public_project'}
-
-        return {valid: true}
-
-
-    canBePrivateProject: (projectId) ->
-        project = @.projects.get('all').find (project) -> project.get('id') == projectId
-
-        return {valid: true} if project.get('is_private')
-
-        result = @.canCreatePrivateProjects()
-
-        return result if !result.valid
-
-        user = @.getUser()
-
-        if user.get('max_members_private_projects') != null && project.get('members').size > user.get('max_members_private_projects')
-            return {valid: false, reason: 'max_members_private_projects', type: 'private_project'}
-
-        return {valid: true}
-
-    canBePublicProject: (projectId) ->
-        project = @.projects.get('all').find (project) -> project.get('id') == projectId
-
-        return {valid: true} if !project.get('is_private')
-
-        result = @.canCreatePublicProjects()
-
-        return result if !result.valid
-
-        user = @.getUser()
-
-        if user.get('max_members_public_projects') != null && project.get('members').size > user.get('max_members_public_projects')
-            return {valid: false, reason: 'max_members_public_projects', type: 'public_project'}
-
-        return {valid: true}
-
     canCreatePrivateProjects: () ->
         user = @.getUser()
-
-        if user.get('max_private_projects') != null && user.get('max_private_projects') <= user.get('total_private_projects')
+        if user.get('max_private_projects') != null && user.get('total_private_projects') >= user.get('max_private_projects')
             return {valid: false, reason: 'max_private_projects', type: 'private_project'}
 
         return {valid: true}
@@ -180,8 +128,26 @@ class CurrentUserService
     canCreatePublicProjects: () ->
         user = @.getUser()
 
-        if user.get('max_public_projects') != null && user.get('max_public_projects') <= user.get('total_public_projects')
+        if user.get('max_public_projects') != null && user.get('total_public_projects') >= user.get('max_public_projects')
             return {valid: false, reason: 'max_public_projects', type: 'public_project'}
+
+        return {valid: true}
+
+    canOwnProject: (project) ->
+        user = @.getUser()
+        if project.get('is_private')
+            result = @.canCreatePrivateProjects()
+            return result if !result.valid
+
+            if user.get('max_memberships_private_projects') != null && project.get('total_memberships') > user.get('max_memberships_private_projects')
+                return {valid: false, reason: 'max_members_private_projects', type: 'private_project'}
+
+        else
+            result = @.canCreatePublicProjects()
+            return result if !result.valid
+
+            if user.get('max_memberships_public_projects') != null && project.get('total_memberships') > user.get('max_memberships_public_projects')
+                return {valid: false, reason: 'max_members_public_projects', type: 'public_project'}
 
         return {valid: true}
 

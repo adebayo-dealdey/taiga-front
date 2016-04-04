@@ -48,12 +48,12 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
         "$tgAnalytics",
         "tgAppMetaService",
         "$translate",
-        "tgCurrentUserService",
         "$tgAuth"
+        "tgLightboxFactory"
     ]
 
     constructor: (@scope, @rootscope, @repo, @confirm, @rs, @params, @q, @location, @navUrls, @analytics,
-                  @appMetaService, @translate, @currentUserService, @tgAuth) ->
+                  @appMetaService, @translate, @auth, @lightboxFactory) ->
         bindMethods(@)
 
         @scope.project = {}
@@ -65,12 +65,11 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
            title = @translate.instant("ADMIN.MEMBERSHIPS.PAGE_TITLE", {projectName:  @scope.project.name})
            description = @scope.project.description
            @appMetaService.setAll(title, description)
-           @._checkUsersLimit()
 
         promise.then null, @.onInitialDataError.bind(@)
 
         @scope.$on "membersform:new:success", =>
-            @.loadMembers()
+            @.loadInitialData()
             @analytics.trackEvent("membership", "create", "create memberships on admin", 1)
 
     loadProject: ->
@@ -80,8 +79,10 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
 
             @scope.projectId = project.id
             @scope.project = project
-            @scope.$emit('project:loaded', project)
 
+            @scope.canAddUsers = project.max_memberships == null || project.max_memberships > project.total_memberships
+
+            @scope.$emit('project:loaded', project)
             return project
 
     loadMembers: ->
@@ -100,7 +101,7 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
         return @.loadProject().then () =>
             return @q.all([
                 @.loadMembers(),
-                @tgAuth.refresh()
+                @auth.refresh()
             ])
 
     getUrlFilters: ->
@@ -108,25 +109,30 @@ class MembershipsController extends mixOf(taiga.Controller, taiga.PageMixin, tai
         filters.page = 1 if not filters.page
         return filters
 
+    # Actions
+
     addNewMembers:  ->
-        @rootscope.$broadcast("membersform:new")
+        @lightboxFactory.create(
+            'tg-lb-add-members',
+            {
+                "class": "lightbox lightbox-add-member",
+                "project": "project"
+            },
+            {
+                "project": @scope.project
+            }
+        )
 
-    _checkUsersLimit: ->
-        @scope.canAddUsers = true
-        userData = @currentUserService.getUser().toJS()
-
-        if @currentUserService.canAddMoreMembersInPrivateProjects(@scope.projectId).valid == false
-            @.maxMembers = userData.max_members_private_projects
-            @scope.canAddUsers = false
-        else if @currentUserService.canAddMoreMembersInPublicProjects(@scope.projectId).valid == false
-            @.maxMembers = userData.max_members_public_projects
-            @scope.canAddUsers = false
-
-    limitUsersWarning: ->
+    showLimitUsersWarningMessage: ->
         title = @translate.instant("ADMIN.MEMBERSHIPS.LIMIT_USERS_WARNING")
-        message = @translate.instant("ADMIN.MEMBERSHIPS.LIMIT_USERS_WARNING_MESSAGE", {members: @.maxMembers})
+        message = @translate.instant("ADMIN.MEMBERSHIPS.LIMIT_USERS_WARNING_MESSAGE", {
+            members: @scope.project.max_memberships
+        })
         icon = "/" + window._version + "/svg/icons/team-question.svg"
-        @confirm.success(title, message,icon)
+        @confirm.success(title, message, {
+            name: icon,
+            type: "img"
+        })
 
 module.controller("MembershipsController", MembershipsController)
 
@@ -274,6 +280,18 @@ MembershipsRowAdminCheckboxDirective = ($log, $repo, $confirm, $template, $compi
     template = $template.get("admin/admin-memberships-row-checkbox.html", true)
 
     link = ($scope, $el, $attrs) ->
+        $scope.$on "$destroy", ->
+            $el.off()
+
+        if not $attrs.tgMembershipsRowAdminCheckbox?
+            return $log.error "MembershipsRowAdminCheckboxDirective: the directive need a member"
+
+        member = $scope.$eval($attrs.tgMembershipsRowAdminCheckbox)
+
+        if member.is_owner
+            $el.find(".js-check").remove()
+            return
+
         render = (member) ->
             ctx = {inputId: "is-admin-#{member.id}"}
 
@@ -281,15 +299,6 @@ MembershipsRowAdminCheckboxDirective = ($log, $repo, $confirm, $template, $compi
             html = $compile(html)($scope)
 
             $el.html(html)
-
-        if not $attrs.tgMembershipsRowAdminCheckbox?
-            return $log.error "MembershipsRowAdminCheckboxDirective: the directive need a member"
-
-        member = $scope.$eval($attrs.tgMembershipsRowAdminCheckbox)
-        html = render(member)
-
-        if member.is_admin
-            $el.find(":checkbox").prop("checked", true)
 
         $el.on "click", ":checkbox", (event) =>
             onSuccess = ->
@@ -304,8 +313,10 @@ MembershipsRowAdminCheckboxDirective = ($log, $repo, $confirm, $template, $compi
             member.is_admin = target.prop("checked")
             $repo.save(member).then(onSuccess, onError)
 
-        $scope.$on "$destroy", ->
-            $el.off()
+        html = render(member)
+
+        if member.is_admin
+            $el.find(":checkbox").prop("checked", true)
 
     return {link: link}
 
@@ -374,7 +385,8 @@ module.directive("tgMembershipsRowRoleSelector", ["$log", "$tgRepo", "$tgConfirm
 ## Member Actions Directive
 #############################################################################
 
-MembershipsRowActionsDirective = ($log, $repo, $rs, $confirm, $compile, $translate) ->
+MembershipsRowActionsDirective = ($log, $repo, $rs, $confirm, $compile, $translate, $location,
+                                  $navUrls, lightboxFactory) ->
     activedTemplate = """
     <div class="active"
          translate="ADMIN.MEMBERSHIP.STATUS_ACTIVE">
@@ -429,9 +441,7 @@ MembershipsRowActionsDirective = ($log, $repo, $rs, $confirm, $compile, $transla
 
             $rs.memberships.resendInvitation($scope.member.id).then(onSuccess, onError)
 
-        $el.on "click", ".delete", (event) ->
-            event.preventDefault()
-
+        leaveConfirm = () ->
             title = $translate.instant("ADMIN.MEMBERSHIP.DELETE_MEMBER")
             defaultMsg = $translate.instant("ADMIN.MEMBERSHIP.DEFAULT_DELETE_MESSAGE", {email: member.email})
             message = if member.user then member.full_name else defaultMsg
@@ -439,28 +449,60 @@ MembershipsRowActionsDirective = ($log, $repo, $rs, $confirm, $compile, $transla
             $confirm.askOnDelete(title, message).then (askResponse) ->
                 onSuccess = =>
                     askResponse.finish()
+                    if member.user != $scope.user.id
+                        if $scope.page > 1 && ($scope.count - 1) <= $scope.paginatedBy
+                            $ctrl.selectFilter("page", $scope.page - 1)
 
-                    if $scope.page > 1 && ($scope.count - 1) <= $scope.paginatedBy
-                        $ctrl.selectFilter("page", $scope.page - 1)
+                        $ctrl.loadInitialData()
+                    else
+                        $location.path($navUrls.resolve("home"))
 
-                    $ctrl.loadMembers()
-
-                    text = $translate.instant("ADMIN.MEMBERSHIP.SUCCESS_DELETE")
-                    $confirm.notify("success", null, text)
+                    text = $translate.instant("ADMIN.MEMBERSHIP.SUCCESS_DELETE", {message: message})
+                    $confirm.notify("success", text, null, 5000)
 
                 onError = =>
                     askResponse.finish(false)
 
                     text = $translate.instant("ADMIN.MEMBERSHIP.ERROR_DELETE", {message: message})
-                    $confirm.notify("error", null, text)
+                    $confirm.notify("error", text)
 
                 $repo.remove(member).then(onSuccess, onError)
+
+        $el.on "click", ".delete", (event) ->
+            event.preventDefault()
+
+            if $scope.project.owner.id == member.user
+                isCurrentUser = $scope.user.id == member.user
+
+                lightboxFactory.create("tg-lightbox-leave-project-warning", {
+                    class: "lightbox lightbox-leave-project-warning"
+                }, {
+                    isCurrentUser: isCurrentUser,
+                    project: $scope.project
+                })
+            else
+                leaveConfirm()
 
         $scope.$on "$destroy", ->
             $el.off()
 
     return {link: link}
 
-
 module.directive("tgMembershipsRowActions", ["$log", "$tgRepo", "$tgResources", "$tgConfirm", "$compile",
-                                             "$translate", MembershipsRowActionsDirective])
+                                             "$translate", "$tgLocation", "$tgNavUrls", "tgLightboxFactory",
+                                             MembershipsRowActionsDirective])
+
+
+#############################################################################
+## No more memberships explanation directive
+#############################################################################
+
+NoMoreMembershipsExplanationDirective = () ->
+    return {
+          templateUrl: "admin/no-more-memberships-explanation.html"
+          scope: {
+              project: "="
+          }
+    }
+
+module.directive("tgNoMoreMembershipsExplanation", [NoMoreMembershipsExplanationDirective])

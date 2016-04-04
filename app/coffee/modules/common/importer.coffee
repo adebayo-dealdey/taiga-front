@@ -32,48 +32,48 @@ ImportProjectButtonDirective = ($rs, $confirm, $location, $navUrls, $translate, 
                 errorKey = ''
 
                 user = currentUserService.getUser()
-                maxMembers = 0
+                maxMemberships = 0
 
                 if result.headers.isPrivate
                     privateError = !currentUserService.canCreatePrivateProjects().valid
-                    maxMembers = null
+                    maxMemberships = null
 
-                    if user.get('max_members_private_projects') != null && result.headers.members > user.get('max_members_private_projects')
+                    if user.get('max_memberships_private_projects') != null && result.headers.memberships >= user.get('max_memberships_private_projects')
                         membersError = true
                     else
                         membersError = false
 
                     if privateError && membersError
                         errorKey = 'private-space-members'
-                        maxMembers = user.get('max_members_private_projects')
+                        maxMemberships = user.get('max_memberships_private_projects')
                     else if privateError
                         errorKey = 'private-space'
                     else if membersError
                         errorKey = 'private-members'
-                        maxMembers = user.get('max_members_private_projects')
+                        maxMemberships = user.get('max_memberships_private_projects')
 
                 else
                     publicError = !currentUserService.canCreatePublicProjects().valid
 
-                    if user.get('max_members_public_projects') != null && result.headers.members > user.get('max_members_public_projects')
+                    if user.get('max_memberships_public_projects') != null && result.headers.memberships >= user.get('max_memberships_public_projects')
                         membersError = true
                     else
                         membersError = false
 
                     if publicError && membersError
                         errorKey = 'public-space-members'
-                        maxMembers = user.get('max_members_public_projects')
+                        maxMemberships = user.get('max_memberships_public_projects')
                     else if publicError
                         errorKey = 'public-space'
                     else if membersError
                         errorKey = 'public-members'
-                        maxMembers = user.get('max_members_public_projects')
+                        maxMemberships = user.get('max_memberships_public_projects')
 
                 return {
                     key: errorKey,
                     values: {
-                        max_members: maxMembers,
-                        members: result.headers.members
+                        max_memberships: maxMemberships,
+                        members: result.headers.memberships
                     }
                 }
             else
@@ -92,17 +92,19 @@ ImportProjectButtonDirective = ($rs, $confirm, $location, $navUrls, $translate, 
             loader = $confirm.loader($translate.instant("PROJECT.IMPORT.UPLOADING_FILE"))
 
             onSuccess = (result) ->
-                loader.stop()
-                if result.status == 202 # Async mode
-                    title = $translate.instant("PROJECT.IMPORT.ASYNC_IN_PROGRESS_TITLE")
-                    message = $translate.instant("PROJECT.IMPORT.ASYNC_IN_PROGRESS_MESSAGE")
-                    $confirm.success(title, message)
+                currentUserService.loadProjects().then () ->
+                    loader.stop()
 
-                else # result.status == 201 # Sync mode
-                    ctx = {project: result.data.slug}
-                    $location.path($navUrls.resolve("project-admin-project-profile-details", ctx))
-                    msg = $translate.instant("PROJECT.IMPORT.SYNC_SUCCESS")
-                    $confirm.notify("success", msg)
+                    if result.status == 202 # Async mode
+                        title = $translate.instant("PROJECT.IMPORT.ASYNC_IN_PROGRESS_TITLE")
+                        message = $translate.instant("PROJECT.IMPORT.ASYNC_IN_PROGRESS_MESSAGE")
+                        $confirm.success(title, message)
+
+                    else # result.status == 201 # Sync mode
+                        ctx = {project: result.data.slug}
+                        $location.path($navUrls.resolve("project-admin-project-profile-details", ctx))
+                        msg = $translate.instant("PROJECT.IMPORT.SYNC_SUCCESS")
+                        $confirm.notify("success", msg)
 
             onError = (result) ->
                 $tgAuth.refresh().then () ->
