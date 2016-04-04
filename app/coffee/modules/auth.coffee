@@ -31,12 +31,19 @@ class LoginPage
     @.$inject = [
         'tgCurrentUserService',
         '$location',
-        '$tgNavUrls'
+        '$tgNavUrls',
+        '$routeParams'
     ]
 
-    constructor: (currentUserService, $location, $navUrls) ->
+    constructor: (currentUserService, $location, $navUrls, $routeParams) ->
         if currentUserService.isAuthenticated()
-            $location.path($navUrls.resolve("home"))
+            url = $navUrls.resolve("home")
+            if $routeParams['next']
+                url = $routeParams['next']
+                $location.search('next', null)
+
+            $location.path(url)
+
 
 module.controller('LoginPage', LoginPage)
 
@@ -358,8 +365,10 @@ ForgotPasswordDirective = ($auth, $confirm, $location, $navUrls, $translate) ->
         onSuccessSubmit = (response) ->
             $location.path($navUrls.resolve("login"))
 
-            text = $translate.instant("FORGOT_PASSWORD_FORM.SUCCESS")
-            $confirm.success(text)
+            title = $translate.instant("FORGOT_PASSWORD_FORM.SUCCESS_TITLE")
+            message = $translate.instant("FORGOT_PASSWORD_FORM.SUCCESS_TEXT")
+
+            $confirm.success(title, message)
 
         onErrorSubmit = (response) ->
             text = $translate.instant("FORGOT_PASSWORD_FORM.ERROR")

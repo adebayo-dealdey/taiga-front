@@ -184,7 +184,7 @@ TeamMemberCurrentUserDirective = () ->
     return {
         templateUrl: "team/team-member-current-user.html"
         scope: {
-            projectId: "=projectid",
+            project: "=project",
             currentUser: "=currentuser",
             stats: "=",
             issuesEnabled: "=issuesenabled",
@@ -225,31 +225,46 @@ module.directive("tgTeamMembers", TeamMembersDirective)
 ## Leave project Directive
 #############################################################################
 
-LeaveProjectDirective = ($repo, $confirm, $location, $rs, $navurls, $translate) ->
+LeaveProjectDirective = ($repo, $confirm, $location, $rs, $navurls, $translate, lightboxFactory, currentUserService) ->
     link = ($scope, $el, $attrs) ->
-        $scope.leave = () ->
+        leaveConfirm = () ->
             leave_project_text = $translate.instant("TEAM.ACTION_LEAVE_PROJECT")
             confirm_leave_project_text = $translate.instant("TEAM.CONFIRM_LEAVE_PROJECT")
 
             $confirm.ask(leave_project_text, confirm_leave_project_text).then (response) =>
-                promise = $rs.projects.leave($attrs.projectid)
+                promise = $rs.projects.leave($scope.project.id)
 
                 promise.then =>
-                    response.finish()
-                    $confirm.notify("success")
-                    $location.path($navurls.resolve("home"))
+                    currentUserService.loadProjects().then () ->
+                        response.finish()
+                        $confirm.notify("success")
+                        $location.path($navurls.resolve("home"))
 
                 promise.then null, (response) ->
                     response.finish()
                     $confirm.notify('error', response.data._error_message)
 
+        $scope.leave = () ->
+            if $scope.project.owner.id == $scope.user.id
+                lightboxFactory.create("tg-lightbox-leave-project-warning", {
+                    class: "lightbox lightbox-leave-project-warning"
+                }, {
+                    isCurrentUser: true,
+                    project: $scope.project
+                })
+            else
+                leaveConfirm()
+
     return {
-        scope: {},
+        scope: {
+            user: "=",
+            project: "="
+        },
         templateUrl: "team/leave-project.html",
         link: link
     }
 
-module.directive("tgLeaveProject", ["$tgRepo", "$tgConfirm", "$tgLocation", "$tgResources", "$tgNavUrls", "$translate",
+module.directive("tgLeaveProject", ["$tgRepo", "$tgConfirm", "$tgLocation", "$tgResources", "$tgNavUrls", "$translate", "tgLightboxFactory", "tgCurrentUserService",
                                     LeaveProjectDirective])
 
 

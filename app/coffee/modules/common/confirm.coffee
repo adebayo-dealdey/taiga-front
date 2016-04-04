@@ -167,9 +167,23 @@ class ConfirmService extends taiga.Service
         el = angular.element(".lightbox-generic-success")
 
         el.find("img").remove()
-        detailImage = $('<img>').addClass('lb-icon').attr('src', icon)
-        if detailImage
-            el.find('section').prepend(detailImage)
+        el.find("svg").remove()
+
+        if icon
+            if icon.type == "img"
+                detailImage = $('<img>').addClass('lb-icon').attr('src', icon.name)
+            else if icon.type == "svg"
+                useSVG = document.createElementNS('http://www.w3.org/2000/svg', 'use')
+                useSVG.setAttributeNS('http://www.w3.org/1999/xlink','href', '#' + icon.name)
+
+                detailImage = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+                detailImage.classList.add("icon")
+                detailImage.classList.add("lb-icon")
+                detailImage.classList.add(icon.name)
+                detailImage.appendChild(useSVG)
+
+            if detailImage
+                el.find('section').prepend(detailImage)
 
         # Render content
         el.find(".title").html(title) if title
@@ -253,6 +267,7 @@ class ConfirmService extends taiga.Service
             body.find(selector)
                 .removeClass('active')
                 .addClass('inactive')
+                .one 'animationend', () -> $(this).removeClass('inactive')
 
             delete @.tsem
 
