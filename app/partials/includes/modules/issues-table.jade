@@ -53,7 +53,8 @@ section.issues-table.basic-table(ng-class="{empty: !issues.length}")
                 title="{{'ISSUES.TABLE.TITLE_ACTION_CHANGE_TRIGGER' | translate}}"
             )
                 span.issue-trigger-bind
-                span.icon.icon-arrow-bottom(tg-check-permission="modify_issue")
+                svg.icon.icon-arrow-down(tg-check-permission="modify_issue")
+                    use(xlink:href="#icon-arrow-down")
 
                 
         div.created-field(tg-bo-bind="issue.created_date|momentFormat:'DD MMM YYYY HH:mm'")
